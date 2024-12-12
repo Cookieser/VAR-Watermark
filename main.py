@@ -24,10 +24,10 @@ def main():
     new_run_parser.add_argument('--data-dir', '-d', required=True, type=str,
                                 help='The directory where the data is stored.')
     new_run_parser.add_argument('--batch-size', '-b', required=True, type=int, help='The batch size.')
-    new_run_parser.add_argument('--epochs', '-e', default=300, type=int, help='Number of epochs to run the simulation.')
+    new_run_parser.add_argument('--epochs', '-e', default=10, type=int, help='Number of epochs to run the simulation.')
     new_run_parser.add_argument('--name', required=True, type=str, help='The name of the experiment.')
 
-    new_run_parser.add_argument('--size', '-s', default=128, type=int,
+    new_run_parser.add_argument('--size', '-s', default=224, type=int,
                                 help='The size of the images (images are square so this is height and width).')
     new_run_parser.add_argument('--message', '-m', default=30, type=int, help='The length in bits of the watermark.')
     new_run_parser.add_argument('--continue-from-folder', '-c', default='', type=str,
