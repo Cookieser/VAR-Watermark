@@ -15,16 +15,16 @@ class Encoder(nn.Module):
         self.conv_channels = config.encoder_channels
         self.num_blocks = config.encoder_blocks
 
-        layers = [ConvBNRelu(3, self.conv_channels)]
+        layers = [ConvBNRelu(32, self.conv_channels)]
 
         for _ in range(config.encoder_blocks-1):
             layer = ConvBNRelu(self.conv_channels, self.conv_channels)
             layers.append(layer)
 
         self.conv_layers = nn.Sequential(*layers)
-        self.after_concat_layer = ConvBNRelu(self.conv_channels + 3 + config.message_length, self.conv_channels)
+        self.after_concat_layer = ConvBNRelu(self.conv_channels + 32 + config.message_length, self.conv_channels)
 
-        self.final_layer = nn.Conv2d(self.conv_channels, 3, kernel_size=1)
+        self.final_layer = nn.Conv2d(self.conv_channels, 32, kernel_size=1)
 
     def forward(self, image, message):
 

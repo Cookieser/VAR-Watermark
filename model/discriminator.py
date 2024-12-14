@@ -9,7 +9,7 @@ class Discriminator(nn.Module):
     def __init__(self, config: HiDDenConfiguration):
         super(Discriminator, self).__init__()
 
-        layers = [ConvBNRelu(3, config.discriminator_channels)]
+        layers = [ConvBNRelu(32, config.discriminator_channels)]
         for _ in range(config.discriminator_blocks-1):
             layers.append(ConvBNRelu(config.discriminator_channels, config.discriminator_channels))
 

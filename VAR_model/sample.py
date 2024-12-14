@@ -1,5 +1,5 @@
 '''
-python sample.py --total_samples 15 --save_path sample_images_test
+python sample.py --total_samples 50 --save_path ../dataset/train/train_class/
 
 '''
 import argparse
@@ -105,7 +105,7 @@ while generated_count < total_samples:
 
     tensor = f_hats[-1]
     for i in range(tensor.size(0)):  
-        single_tensor = tensor[i].unsqueeze(0)  # [1, 32, 16, 16]
+        single_tensor = tensor[i].squeeze(0)  # [32, 16, 16]
         file_name = osp.join(save_path, f"image{generated_count + i}.pt")  
         torch.save(single_tensor, file_name)  
         print(f"Saved image tensor {generated_count + i} with shape {single_tensor.shape} to {file_name}")
