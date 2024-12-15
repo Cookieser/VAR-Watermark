@@ -24,7 +24,7 @@ def main():
     new_run_parser.add_argument('--data-dir', '-d', required=True, type=str,
                                 help='The directory where the data is stored.')
     new_run_parser.add_argument('--batch-size', '-b', required=True, type=int, help='The batch size.')
-    new_run_parser.add_argument('--epochs', '-e', default=10, type=int, help='Number of epochs to run the simulation.')
+    new_run_parser.add_argument('--epochs', '-e', default=50, type=int, help='Number of epochs to run the simulation.')
     new_run_parser.add_argument('--name', required=True, type=str, help='The name of the experiment.')
 
     new_run_parser.add_argument('--size', '-s', default=16, type=int,
@@ -82,8 +82,8 @@ def main():
         train_options = TrainingOptions(
             batch_size=args.batch_size,
             number_of_epochs=args.epochs,
-            train_folder=os.path.join(args.data_dir, 'train'),
-            validation_folder=os.path.join(args.data_dir, 'val'),
+            train_folder=os.path.join(args.data_dir, 'train/train_class'),
+            validation_folder=os.path.join(args.data_dir, 'val/val_class'),
             runs_folder=os.path.join('.', 'runs'),
             start_epoch=start_epoch,
             experiment_name=args.name)

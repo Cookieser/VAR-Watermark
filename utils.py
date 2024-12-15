@@ -13,6 +13,8 @@ from torch.utils import data
 import torch.nn.functional as F
 
 from options import HiDDenConfiguration, TrainingOptions
+
+from torch.utils.data import TensorDataset, DataLoader
 from model.hidden import Hidden
 
 
@@ -119,34 +121,89 @@ def load_options(options_file_name) -> (TrainingOptions, HiDDenConfiguration, di
     return train_options, hidden_config, noise_config
 
 
+# def get_data_loaders(hidden_config: HiDDenConfiguration, train_options: TrainingOptions):
+#     """ Get torch data loaders for training and validation. The data loaders take a crop of the image,
+#     transform it into tensor, and normalize it."""
+#     data_transforms = {
+#         'train': transforms.Compose([
+#             transforms.RandomCrop((hidden_config.H, hidden_config.W), pad_if_needed=True),
+#             transforms.ToTensor(),
+#             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+#         ]),
+#         'test': transforms.Compose([
+#             transforms.CenterCrop((hidden_config.H, hidden_config.W)),
+#             transforms.ToTensor(),
+#             transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+#         ])
+#     }
+
+#     train_images = datasets.ImageFolder(train_options.train_folder, data_transforms['train'])
+#     train_loader = torch.utils.data.DataLoader(train_images, batch_size=train_options.batch_size, shuffle=True,
+#                                                num_workers=4)
+
+#     validation_images = datasets.ImageFolder(train_options.validation_folder, data_transforms['test'])
+#     validation_loader = torch.utils.data.DataLoader(validation_images, batch_size=train_options.batch_size,
+#                                                     shuffle=False, num_workers=4)
+
+#     return train_loader, validation_loader
+
+
+def new_loader(folder,batch_size,data_transform):
+
+    class_name = os.path.basename(os.path.normpath(folder))
+    pt_files = sorted([f for f in os.listdir(folder) if f.endswith('.pt')])
+
+    all_tensors = []
+    for filename in pt_files:
+        file_path = os.path.join(folder, filename)
+        data = torch.load(file_path,weights_only=True)  
+        all_tensors.append(data)
+
+    dataset_tensor = torch.stack(all_tensors, dim=0)
+    
+
+    print(dataset_tensor.size())
+    labels = torch.zeros(len(all_tensors), dtype=torch.long)  
+
+    transformed_tensor = torch.stack([data_transform(img) for img in dataset_tensor])
+
+
+    images = TensorDataset(transformed_tensor, labels)
+
+    classes = [class_name]
+    images.classes = classes
+    class_to_idx = {cls_name: idx for idx, cls_name in enumerate(classes)}
+
+    images.class_to_idx = class_to_idx
+
+    loader = torch.utils.data.DataLoader(images, batch_size=batch_size, shuffle=True)
+    return loader
+
+
 def get_data_loaders(hidden_config: HiDDenConfiguration, train_options: TrainingOptions):
     """ Get torch data loaders for training and validation. The data loaders take a crop of the image,
     transform it into tensor, and normalize it."""
+    H = hidden_config.H
+    W = hidden_config.W
+
     data_transforms = {
         'train': transforms.Compose([
-            transforms.RandomCrop((hidden_config.H, hidden_config.W), pad_if_needed=True),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            transforms.RandomCrop((H, W), pad_if_needed=True),
+            #transforms.Normalize(mean=[0.5]*32, std=[0.5]*32)
         ]),
         'test': transforms.Compose([
-            transforms.CenterCrop((hidden_config.H, hidden_config.W)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            transforms.CenterCrop((H, W)),
+            #transforms.Normalize(mean=[0.5]*32, std=[0.5]*32)
         ])
     }
-
-    train_images = datasets.ImageFolder(train_options.train_folder, data_transforms['train'])
-    train_loader = torch.utils.data.DataLoader(train_images, batch_size=train_options.batch_size, shuffle=True,
-                                               num_workers=4)
-
-    validation_images = datasets.ImageFolder(train_options.validation_folder, data_transforms['test'])
-    validation_loader = torch.utils.data.DataLoader(validation_images, batch_size=train_options.batch_size,
-                                                    shuffle=False, num_workers=4)
-
-    return train_loader, validation_loader
+    print(train_options.train_folder)
+    train_loader = new_loader(train_options.train_folder,train_options.batch_size,data_transforms['train'])
+    val_loader = new_loader(train_options.validation_folder,train_options.batch_size,data_transforms['test'])
+    
 
 
-def get_data_loaders(hidden_config: HiDDenConfiguration, train_options: TrainingOptions):
+    return train_loader,val_loader   
+ 
 
     
 
