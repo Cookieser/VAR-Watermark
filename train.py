@@ -82,11 +82,17 @@ def train(model: Hidden,
                 if hidden_config.enable_fp16:
                     image = image.float()
                     encoded_images = encoded_images.float()
+                
+
                 images_folder = os.path.join(this_run_folder, 'images')
-                os.makedirs(images_folder, exist_ok=True)  # 确保目标文件夹存在
-                filename = os.path.join(images_folder, 'epoch-{}.pt'.format(epoch))
-                torch.save(encoded_images, filename)
-                print(f"Saved encoded_images to {filename}")
+                os.makedirs(images_folder, exist_ok=True)  
+                filename_watermark = os.path.join(images_folder, 'epoch-watermark-{}.pt'.format(epoch))
+                filename_original = os.path.join(images_folder, 'epoch-original-{}.pt'.format(epoch))
+                torch.save(image, filename_original)
+                print(f"Saved original_images to {filename_original}")
+                torch.save(encoded_images, filename_watermark)
+                print(f"Saved encoded_images to {filename_watermark}")
+
                 # utils.save_images(image.cpu()[:images_to_save, :, :, :],
                 #                   encoded_images[:images_to_save, :, :, :].cpu(),
                 #                   epoch,
