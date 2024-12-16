@@ -67,7 +67,7 @@ For our modified setup, the watermark is embedded directly into the embedding fe
 
 ## Experiment
 
-#### Sampling Parameters for VAR
+#### Parameters for VAR
 
 - **Model Depth**: 24
 - **Batch Size**: 10
