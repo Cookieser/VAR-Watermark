@@ -101,7 +101,7 @@ The following images demonstrate the output after training with the watermarking
 #### Test_model.py
 
 ```
-python test_model.py --checkpoint-file "/home/yw699/codes/VAR-Watermark/runs/var-watermark 2024.12.16--13-12-23/checkpoints/var-watermark--epoch-300.pyt" --source-image /home/yw699/codes/VAR-Watermark/dataset/val/val_class/image0.pt --options-file "/home/yw699/codes/VAR-Watermark/runs/var-watermark 2024.12.16--13-12-23/options-and-config.pickle"
+python test_model.py --checkpoint-file "./runs/var-watermark 2024.12.16--13-12-23/checkpoints/var-watermark--epoch-300.pyt" --source-image ./dataset/val/val_class/image0.pt --options-file "./var-watermark 2024.12.16--13-12-23/options-and-config.pickle"
 ```
 
 output
