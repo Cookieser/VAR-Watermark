@@ -1,7 +1,4 @@
-'''
-python sample.py --total_samples 50 --save_path ../dataset/train/train_class/
 
-'''
 import argparse
 import os
 import os.path as osp
