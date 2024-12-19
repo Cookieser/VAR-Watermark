@@ -256,15 +256,9 @@ class ImageEmbedding:
         image = Image.open(input_path).convert('RGB')
         print(image.size)
         f = self.encoder(image,batch)
-        self.show_images_from_batch_embedding(f, "re-image.png")
-        # f = f.squeeze(0)
         torch.save(f, output_path)
         print(f"Embedding saved to {output_path}")
         return f
 
 
-#if torch.allclose(f, input_tensor_original, atol=1e-5):
-#     print("Same!!!")
-# else:
-#     print("Not!!!!")
     

@@ -183,3 +183,5 @@ class Hidden:
 
     def to_stirng(self):
         return '{}\n{}'.format(str(self.encoder_decoder), str(self.discriminator))
+
+
