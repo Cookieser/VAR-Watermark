@@ -48,7 +48,7 @@ The data directory has the following structure:
 You will need to install the requirements, then run 
 
 ```
-python main.py new --name <experiment_name> --data-dir <data_root> --batch-size <b> 
+python sample_image.py new --name <experiment_name> --data-dir <data_root> --batch-size <b> --device <id>
 ```
 
 To adapt the **HiDDeN** method for watermarking VAR's embedding features, we have modified the network's structure and scales to align with the input dimensions specific to our use case.

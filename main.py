@@ -14,7 +14,7 @@ from noise_argparser import NoiseArgParser
 
 from train import train
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 
 # nohup python main.py new --name var-watermark --data-dir dataset --batch-size 64 &

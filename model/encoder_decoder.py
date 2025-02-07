@@ -29,23 +29,43 @@ class EncoderDecoder(nn.Module):
     #     return encoded_image, noised_image, decoded_message
 
 
-    def forward(self, embedding, message,var,batch):  
+    # def forward(self, embedding, message,var,batch):  
 
-        original_image = var.embed_to_image(embedding)
+    #     original_image = var.embed_to_image(embedding)
+
+    #     encoded_embedding = self.encoder(embedding, message) # [B, 32, 16, 16]
+
+    #     encoded_image = var.embed_to_image(encoded_embedding) # [B, 3, 256, 256]
+
+    #     noised_and_cover = self.noiser([encoded_image, original_image]) # [B, 3, 256, 256]
+
+    #     noised_image = noised_and_cover[0]
+
+    #     noised_image_embedding = var.image_to_embed(noised_image,batch) # [B, 32, 16, 16]
+
+    #     decoded_message = self.decoder(noised_image_embedding)
+
+    #     return encoded_embedding, noised_image_embedding, decoded_message
+        
+
+
+    def forward(self, embedding, message,var,batch):  
 
         encoded_embedding = self.encoder(embedding, message) # [B, 32, 16, 16]
 
-        encoded_image = var.embed_to_image(encoded_embedding) # [B, 3, 256, 256]
+        encoded_image = var.var_decoder(encoded_embedding) # [B, 3, 256, 256]
+
+        original_image = var.var_decoder(embedding)
 
         noised_and_cover = self.noiser([encoded_image, original_image]) # [B, 3, 256, 256]
 
+
         noised_image = noised_and_cover[0]
 
-        noised_image_embedding = var.image_to_embed(noised_image,batch) # [B, 32, 16, 16]
+        # noised_image_embedding = var.image_to_embed(noised_image,batch) # [B, 32, 16, 16]
 
-        decoded_message = self.decoder(noised_image_embedding)
+        decoded_message = self.decoder(noised_image) # [B, 3, 256, 256]
 
-        return encoded_embedding, noised_image_embedding, decoded_message
-
+        return encoded_embedding, noised_image, decoded_message
 
 
