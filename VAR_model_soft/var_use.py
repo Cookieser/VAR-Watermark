@@ -13,16 +13,14 @@ class VarTool:
         self.device = device if torch.cuda.is_available() else 'cpu'
         self.model_depth = model_depth
         self.patch_nums = patch_nums
-        self.seed = 1
         self.vqvae, self.var = self._load_models()
         self._set_seed()
         self._configure_tf32(tf32)
-        
 
-    def _set_seed(self):
-        torch.manual_seed(self.seed)
-        random.seed(self.seed)
-        np.random.seed(self.seed)
+    def _set_seed(self, seed=1):
+        torch.manual_seed(seed)
+        random.seed(seed)
+        np.random.seed(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
@@ -101,26 +99,13 @@ class VarTool:
         print(f"Image saved to {output_path}")
 
 
-    
-    def generate_form_labels(self,class_labels):
-        cfg = 4 #@param {type:"slider", min:1, max:10, step:0.1}
-        more_smooth = False # True for more smooth output
-        label_B: torch.LongTensor = torch.tensor(class_labels, device=self.device)
-        with torch.inference_mode():
-            with torch.autocast('cuda', enabled=True, dtype=torch.float16, cache_enabled=True):    # using bfloat16 can be faster
-                f_hats,hs = self.var.autoregressive_infer_cfg(B=len(class_labels), label_B=label_B, cfg=cfg, top_k=900, top_p=0.95, g_seed=self.seed, more_smooth=more_smooth)
-        return f_hats,hs
 
-    
-    def save_image(self,recon_B3HW,output):  
-        chw = torchvision.utils.make_grid(recon_B3HW, nrow=recon_B3HW.shape[0], padding=0, pad_value=1.0)
+    def save_image(self,recon_B3HW,batch,output_path):
+        chw = torchvision.utils.make_grid(recon_B3HW, nrow=batch, padding=0, pad_value=1.0)
         chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
         chw = PImage.fromarray(chw.astype(np.uint8))
-        chw.save(output)
-        print(f"Image({recon_B3HW.size()}) saved to {output}")
-
-
-
+        chw.save(output_path)
+        #print(f"Image saved to {output_path}")
 
 
 

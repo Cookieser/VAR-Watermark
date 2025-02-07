@@ -9,8 +9,8 @@ from collections import defaultdict
 from options import *
 from model.hidden import Hidden
 from average_meter import AverageMeter
-
-
+from VAR_model.var_use import VarTool
+from tqdm import tqdm
 def train(model: Hidden,
           device: torch.device,
           hidden_config: HiDDenConfiguration,
@@ -29,6 +29,8 @@ def train(model: Hidden,
     :return:
     """
 
+    var = VarTool(device = device);
+
     train_data, val_data = utils.get_data_loaders(hidden_config, train_options)
     file_count = len(train_data.dataset)
     if file_count % train_options.batch_size == 0:
@@ -46,10 +48,11 @@ def train(model: Hidden,
         training_losses = defaultdict(AverageMeter)
         epoch_start = time.time()
         step = 1
-        for image, _ in train_data:
+        #for image, _ in train_data:
+        for image, _ in tqdm(train_data, desc="Processing train data"):
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
-            losses, _ = model.train_on_batch([image, message])
+            losses, _ = model.train_on_batch([image, message],var)
 
             for name, loss in losses.items():
                 training_losses[name].update(loss)
@@ -72,10 +75,11 @@ def train(model: Hidden,
         first_iteration = True
         validation_losses = defaultdict(AverageMeter)
         logging.info('Running validation for epoch {}/{}'.format(epoch, train_options.number_of_epochs))
-        for image, _ in val_data:
+        #for image, _ in val_data:
+        for image, _ in tqdm(val_data, desc="Processing validation data"):
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
-            losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message])
+            losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message],var)
             for name, loss in losses.items():
                 validation_losses[name].update(loss)
             if first_iteration:
@@ -93,10 +97,6 @@ def train(model: Hidden,
                 torch.save(encoded_images, filename_watermark)
                 print(f"Saved encoded_images to {filename_watermark}")
 
-                # utils.save_images(image.cpu()[:images_to_save, :, :, :],
-                #                   encoded_images[:images_to_save, :, :, :].cpu(),
-                #                   epoch,
-                #                   os.path.join(this_run_folder, 'images'), resize_to=saved_images_size)
                 first_iteration = False
 
         utils.log_progress(validation_losses)

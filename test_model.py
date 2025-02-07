@@ -34,8 +34,6 @@ def main():
     parser.add_argument('--batch-size', '-b', default=64, type=int, help='The batch size.')
     parser.add_argument('--source-image', '-s', required=True, type=str,
                         help='The image to watermark')
-    # parser.add_argument('--times', '-t', default=10, type=int,
-    #                     help='Number iterations (insert watermark->extract).')
 
     args = parser.parse_args()
 
@@ -45,13 +43,6 @@ def main():
     checkpoint = torch.load(args.checkpoint_file)
     hidden_net = Hidden(hidden_config, device, noiser, None)
     utils.model_from_checkpoint(hidden_net, checkpoint)
-
-
-    # image_pil = Image.open(args.source_image)
-    # image = randomCrop(np.array(image_pil), hidden_config.H, hidden_config.W)
-    # image_tensor = TF.to_tensor(image).to(device)
-    # image_tensor = image_tensor * 2 - 1  # transform from [0, 1] to [-1, 1]
-    # image_tensor.unsqueeze_(0)
 
     image_tensor = torch.load(args.source_image,weights_only=True)
     image_tensor.unsqueeze_(0)
@@ -67,8 +58,6 @@ def main():
     print('original: {}'.format(message_detached))
     print('decoded : {}'.format(decoded_rounded))
     print('error : {:.3f}'.format(np.mean(np.abs(decoded_rounded - message_detached))))
-    #utils.save_images(image_tensor.cpu(), encoded_images.cpu(), 'test', '.', resize_to=(256, 256))
-
     bitwise_avg_err = np.sum(np.abs(decoded_rounded - message.detach().cpu().numpy()))/(image_tensor.shape[0] * message.shape[1])
     print(f"bitwise_avg_err: {bitwise_avg_err}")
 

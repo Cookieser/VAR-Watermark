@@ -60,7 +60,9 @@ class VQVAE(nn.Module):
     # ===================== `forward` is only used in VAE training =====================
     
     def fhat_to_img(self, f_hat: torch.Tensor):
+        #print("[fhat_to_img] f_hats.requires_grad:", f_hat.requires_grad)
         recon = self.decoder(self.post_quant_conv(f_hat)).clamp_(-1, 1)
+        #print("[fhat_to_img] recon.requires_grad:", recon.requires_grad)
         return recon
     
     def img_to_idxBl(self, inp_img_no_grad: torch.Tensor, v_patch_nums: Optional[Sequence[Union[int, Tuple[int, int]]]] = None) -> List[torch.LongTensor]:    # return List[Bl]

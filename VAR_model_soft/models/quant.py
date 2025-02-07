@@ -132,39 +132,88 @@ class VectorQuantizer2(nn.Module):
         
         return ls_f_hat_BChw
     
-    def f_to_idxBl_or_fhat(self, f_BChw: torch.Tensor, to_fhat: bool, v_patch_nums: Optional[Sequence[Union[int, Tuple[int, int]]]] = None) -> List[Union[torch.Tensor, torch.LongTensor]]:  # z_BChw is the feature from inp_img_no_grad
-            B, C, H, W = f_BChw.shape
-            f_no_grad = f_BChw.detach()
-            f_rest = f_no_grad.clone()
-            f_hat = torch.zeros_like(f_rest)
+    # def f_to_idxBl_or_fhat(self, f_BChw: torch.Tensor, to_fhat: bool, v_patch_nums: Optional[Sequence[Union[int, Tuple[int, int]]]] = None) -> List[Union[torch.Tensor, torch.LongTensor]]:  # z_BChw is the feature from inp_img_no_grad
+    #     B, C, H, W = f_BChw.shape
+    #     f_no_grad = f_BChw.detach()
+    #     f_rest = f_no_grad.clone()
+    #     f_hat = torch.zeros_like(f_rest)
+        
+    #     f_hat_or_idx_Bl: List[torch.Tensor] = []
+        
+    #     patch_hws = [(pn, pn) if isinstance(pn, int) else (pn[0], pn[1]) for pn in (v_patch_nums or self.v_patch_nums)]    # from small to large
+    #     assert patch_hws[-1][0] == H and patch_hws[-1][1] == W, f'{patch_hws[-1]=} != ({H=}, {W=})'
+        
+    #     SN = len(patch_hws)
+    #     for si, (ph, pw) in enumerate(patch_hws): # from small to large
+    #         if 0 <= self.prog_si < si: break    # progressive training: not supported yet, prog_si always -1
+    #         # find the nearest embedding
+    #         z_NC = F.interpolate(f_rest, size=(ph, pw), mode='area').permute(0, 2, 3, 1).reshape(-1, C) if (si != SN-1) else f_rest.permute(0, 2, 3, 1).reshape(-1, C)
+    #         if self.using_znorm:
+    #             z_NC = F.normalize(z_NC, dim=-1)
+    #             idx_N = torch.argmax(z_NC @ F.normalize(self.embedding.weight.data.T, dim=0), dim=1)
+    #         else:
+    #             d_no_grad = torch.sum(z_NC.square(), dim=1, keepdim=True) + torch.sum(self.embedding.weight.data.square(), dim=1, keepdim=False)
+    #             d_no_grad.addmm_(z_NC, self.embedding.weight.data.T, alpha=-2, beta=1)  # (B*h*w, vocab_size)
+    #             idx_N = torch.argmin(d_no_grad, dim=1)
             
-            f_hat_or_idx_Bl: List[torch.Tensor] = []
-            
-            patch_hws = [(pn, pn) if isinstance(pn, int) else (pn[0], pn[1]) for pn in (v_patch_nums or self.v_patch_nums)]    # from small to large
-            assert patch_hws[-1][0] == H and patch_hws[-1][1] == W, f'{patch_hws[-1]=} != ({H=}, {W=})'
-            
-            SN = len(patch_hws)
-            for si, (ph, pw) in enumerate(patch_hws): # from small to large
-                if 0 <= self.prog_si < si: break    # progressive training: not supported yet, prog_si always -1
-                # find the nearest embedding
-                z_NC = F.interpolate(f_rest, size=(ph, pw), mode='area').permute(0, 2, 3, 1).reshape(-1, C) if (si != SN-1) else f_rest.permute(0, 2, 3, 1).reshape(-1, C)
-                if self.using_znorm:
-                    z_NC = F.normalize(z_NC, dim=-1)
-                    idx_N = torch.argmax(z_NC @ F.normalize(self.embedding.weight.data.T, dim=0), dim=1)
-                else:
-                    d_no_grad = torch.sum(z_NC.square(), dim=1, keepdim=True) + torch.sum(self.embedding.weight.data.square(), dim=1, keepdim=False)
-                    d_no_grad.addmm_(z_NC, self.embedding.weight.data.T, alpha=-2, beta=1)  # (B*h*w, vocab_size)
-                    idx_N = torch.argmin(d_no_grad, dim=1)
-                
-                idx_Bhw = idx_N.view(B, ph, pw)
-                h_BChw = F.interpolate(self.embedding(idx_Bhw).permute(0, 3, 1, 2), size=(H, W), mode='bicubic').contiguous() if (si != SN-1) else self.embedding(idx_Bhw).permute(0, 3, 1, 2).contiguous()
-                h_BChw = self.quant_resi[si/(SN-1)](h_BChw)
-                f_hat.add_(h_BChw)
-                f_rest.sub_(h_BChw)
-                f_hat_or_idx_Bl.append(f_hat.clone() if to_fhat else idx_N.reshape(B, ph*pw))
-            
-            return f_hat_or_idx_Bl
+    #         idx_Bhw = idx_N.view(B, ph, pw)
+    #         h_BChw = F.interpolate(self.embedding(idx_Bhw).permute(0, 3, 1, 2), size=(H, W), mode='bicubic').contiguous() if (si != SN-1) else self.embedding(idx_Bhw).permute(0, 3, 1, 2).contiguous()
+    #         h_BChw = self.quant_resi[si/(SN-1)](h_BChw)
+    #         f_hat.add_(h_BChw)
+    #         f_rest.sub_(h_BChw)
+    #         f_hat_or_idx_Bl.append(f_hat.clone() if to_fhat else idx_N.reshape(B, ph*pw))
+        
+    #     return f_hat_or_idx_Bl
     
+    def soft_quantization(z_NC, codebook, temperature=1.0):
+        distances = (z_NC.unsqueeze(1) - codebook.unsqueeze(0)).pow(2).sum(-1)
+        weights = torch.softmax(-distances / temperature, dim=1)
+        return torch.matmul(weights, codebook)
+
+    def f_to_idxBl_or_fhat(self, f_BChw: torch.Tensor, to_fhat: bool, v_patch_nums: Optional[Sequence[Union[int, Tuple[int, int]]]] = None) -> List[Union[torch.Tensor, torch.LongTensor]]:
+        B, C, H, W = f_BChw.shape
+
+        # 让 f_rest 保持梯度
+        f_rest = f_BChw.clone()
+        f_hat = torch.zeros_like(f_rest)
+
+        f_hat_or_idx_Bl: List[torch.Tensor] = []
+        patch_hws = [(pn, pn) if isinstance(pn, int) else (pn[0], pn[1]) for pn in (v_patch_nums or self.v_patch_nums)]
+        assert patch_hws[-1][0] == H and patch_hws[-1][1] == W, f'{patch_hws[-1]=} != ({H=}, {W=})'
+
+        SN = len(patch_hws)
+        for si, (ph, pw) in enumerate(patch_hws):
+            if 0 <= self.prog_si < si: break  # progressive training
+
+            # 让 z_NC 保持梯度
+            z_NC = (F.interpolate(f_rest, size=(ph, pw), mode='area') if (si != SN-1) else f_rest).permute(0, 2, 3, 1).reshape(-1, C)
+
+            if self.using_znorm:
+                z_NC = F.normalize(z_NC, dim=-1)
+                #idx_N = torch.argmax(z_NC @ F.normalize(self.embedding.weight.data.T, dim=0), dim=1)
+                quantized = soft_quantization(z_NC, self.embedding.weight.data, temperature=0.1)
+            else:
+                d_no_grad = torch.sum(z_NC.square(), dim=1, keepdim=True) + torch.sum(self.embedding.weight.data.square(), dim=1, keepdim=False)
+                d_no_grad.addmm_(z_NC, self.embedding.weight.data.T, alpha=-2, beta=1)
+                weights = torch.softmax(-d_no_grad / 0.1, dim=1)  
+                quantized = torch.matmul(weights, self.embedding.weight.data)
+                #idx_N = torch.argmin(d_no_grad, dim=1)
+
+            h_BChw = quantized.view(B, ph, pw, -1).permute(0, 3, 1, 2)
+            h_BChw = F.interpolate(h_BChw, size=(H, W), mode='bicubic') if (si != SN-1) else h_BChw
+            h_BChw = self.quant_resi[si/(SN-1)](h_BChw)
+
+            #idx_Bhw = idx_N.view(B, ph, pw)
+            #h_BChw = (F.interpolate(self.embedding(idx_Bhw).permute(0, 3, 1, 2), size=(H, W), mode='bicubic') if (si != SN-1) else self.embedding(idx_Bhw).permute(0, 3, 1, 2)).contiguous()
+            #h_BChw = self.quant_resi[si/(SN-1)](h_BChw)
+
+            
+            f_hat = f_hat + h_BChw  
+            f_rest = f_rest - h_BChw
+
+            f_hat_or_idx_Bl.append(f_hat.clone() if to_fhat else idx_N.reshape(B, ph*pw))
+
+        return f_hat_or_idx_Bl
 
 
     # ===================== idxBl_to_var_input: only used in VAR training, for getting teacher-forcing input =====================
@@ -191,11 +240,11 @@ class VectorQuantizer2(nn.Module):
         if si != SN-1:
             h = self.quant_resi[si/(SN-1)](F.interpolate(h_BChw, size=(HW, HW), mode='bicubic'))     # conv after upsample
             f_hat.add_(h)
-            return f_hat, F.interpolate(f_hat, size=(self.v_patch_nums[si+1], self.v_patch_nums[si+1]), mode='area'),h
+            return f_hat, F.interpolate(f_hat, size=(self.v_patch_nums[si+1], self.v_patch_nums[si+1]), mode='area')
         else:
             h = self.quant_resi[si/(SN-1)](h_BChw)
             f_hat.add_(h)
-            return f_hat, f_hat,h
+            return f_hat, f_hat
 
 
 class Phi(nn.Conv2d):

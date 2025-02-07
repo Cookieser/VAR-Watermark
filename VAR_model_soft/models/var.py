@@ -174,8 +174,6 @@ class VAR(nn.Module):
 
         # 用于存储最终的特征图，self.patch_nums[-1] 是最后一阶段的分块数，self.Cvae 是特征通道数
         f_hats =[]
-        # 存储残差
-        hs = []
         f_hat = sos.new_zeros(B, self.Cvae, self.patch_nums[-1], self.patch_nums[-1])
         
         for b in self.blocks: b.attn.kv_caching(True) # 加速推理过程
@@ -212,8 +210,8 @@ class VAR(nn.Module):
                 h_BChw = gumbel_softmax_with_rng(logits_BlV.mul(1 + ratio), tau=gum_t, hard=False, dim=-1, rng=rng) @ self.vae_quant_proxy[0].embedding.weight.unsqueeze(0)
             
             h_BChw = h_BChw.transpose_(1, 2).reshape(B, self.Cvae, pn, pn)
-            f_hat, next_token_map,h = self.vae_quant_proxy[0].get_next_autoregressive_input(si, len(self.patch_nums), f_hat, h_BChw)
-            hs.append(h.clone())
+            f_hat, next_token_map = self.vae_quant_proxy[0].get_next_autoregressive_input(si, len(self.patch_nums), f_hat, h_BChw)
+            
             f_hats.append(f_hat.clone())
             # 通过重塑、嵌入更新和批量扩展，为下一阶段生成准备输入
             if si != self.num_stages_minus_1:   # prepare for next stage
@@ -225,9 +223,12 @@ class VAR(nn.Module):
         
         for b in self.blocks: b.attn.kv_caching(False)
 
+        # 将特征图解码为图像格式
+        # 对张量中的所有值加 1，原始特征图的值范围是 [-1, 1]，加 1 后范围变为 [0, 2]
+        # 对加 1 后的张量乘以 0.5，将值范围缩放到 [0, 1]
 
         # return self.vae_proxy[0].fhat_to_img(f_hat).add_(1).mul_(0.5)   # de-normalize, from [-1, 1] to [0, 1]
-        return f_hats,hs
+        return f_hats
     
     def forward(self, label_B: torch.LongTensor, x_BLCv_wo_first_l: torch.Tensor) -> torch.Tensor:  # returns logits_BLV
         """

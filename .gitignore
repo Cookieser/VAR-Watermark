@@ -38,6 +38,7 @@ __pycache__/
 .ipynb_checkpoints/
 .vscode/
 data/
+dataset/
 runs/
 saved-runs/
 

@@ -51,7 +51,7 @@ class Hidden:
             discrim_final.weight.register_hook(tb_logger.grad_hook_by_name('grads/discrim_out'))
 
 
-    def train_on_batch(self, batch: list):
+    def train_on_batch(self, batch: list,var):
         """
         Trains the network on a single batch consisting of images and messages
         :param batch: batch of training data, in the form [images, messages]
@@ -75,7 +75,8 @@ class Hidden:
             d_loss_on_cover.backward()
 
             # train on fake
-            encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
+            encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
+            #encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
             d_on_encoded = self.discriminator(encoded_images.detach())
             d_loss_on_encoded = self.bce_with_logits_loss(d_on_encoded, d_target_label_encoded)
 
@@ -117,7 +118,7 @@ class Hidden:
         }
         return losses, (encoded_images, noised_images, decoded_messages)
 
-    def validate_on_batch(self, batch: list):
+    def validate_on_batch(self, batch: list,var):
         """
         Runs validation on a single batch of data consisting of images and messages
         :param batch: batch of validation data, in form [images, messages]
@@ -147,7 +148,8 @@ class Hidden:
             d_on_cover = self.discriminator(images)
             d_loss_on_cover = self.bce_with_logits_loss(d_on_cover, d_target_label_cover)
 
-            encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
+            encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
+            #encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
 
             d_on_encoded = self.discriminator(encoded_images)
             d_loss_on_encoded = self.bce_with_logits_loss(d_on_encoded, d_target_label_encoded)
