@@ -83,7 +83,7 @@ class VarTool:
         fhat = fhat.to(self.device) 
         assert fhat.shape[1:] == (32, 16, 16), f"Expected shape (*, 32, 16, 16), but got {fhat.shape}"
 
-        recon_B3HW = self.vqvae.decoder(self.vqvae.post_quant_conv(fhat)).clamp_(-1, 1)
+        recon_B3HW = self.vqvae.decoder(self.vqvae.post_quant_conv(fhat)).clamp(-1, 1)
 
         recon_B3HW = (recon_B3HW + 1) * 0.5
         assert recon_B3HW.shape[1:] == (3, 256, 256), f"Expected shape (*, 3, 256, 256), but got {recon_B3HW.shape}"
