@@ -2,20 +2,16 @@ import torch
 import torch.nn as nn
 from options import HiDDenConfiguration
 from model.conv_bn_relu import ConvBNRelu
+from model.encoder.base_encoder import BaseEncoder
 
-
-class Encoder(nn.Module):
+class Encoder(BaseEncoder):
     """
     Inserts a watermark into an image.
     """
-    def __init__(self, config: HiDDenConfiguration):
-        super(Encoder, self).__init__()
-        self.H = config.H
-        self.W = config.W
-        self.conv_channels = config.encoder_channels
-        self.num_blocks = config.encoder_blocks
-
-        layers = [ConvBNRelu(32, self.conv_channels)]
+    def __init__(self, config: HiDDenConfiguration,input_size):
+        super(Encoder, self).__init__(config,input_size)
+        
+        layers = [ConvBNRelu(self.input_size, self.conv_channels)]
 
         for _ in range(config.encoder_blocks-1):
             layer = ConvBNRelu(self.conv_channels, self.conv_channels)

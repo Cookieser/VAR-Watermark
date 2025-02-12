@@ -117,6 +117,7 @@ class VarTool:
         chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
         chw = PImage.fromarray(chw.astype(np.uint8))
         chw.save(output)
+        display(chw)
         print(f"Image({recon_B3HW.size()}) saved to {output}")
 
 

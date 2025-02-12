@@ -18,7 +18,7 @@ def train(model: Hidden,
           this_run_folder: str,
           tb_logger):
     """
-    Trains the HiDDeN model
+    Trains the model
     :param model: The model
     :param device: torch.device object, usually this is GPU (if avaliable), otherwise CPU.
     :param hidden_config: The network configuration
@@ -39,8 +39,8 @@ def train(model: Hidden,
         steps_in_epoch = file_count // train_options.batch_size + 1
 
     print_each = 10
-    images_to_save = 8
-    saved_images_size = (512, 512)
+    # images_to_save = 8
+    #saved_images_size = (512, 512)
 
     for epoch in range(train_options.start_epoch, train_options.number_of_epochs + 1):
         logging.info('\nStarting epoch {}/{}'.format(epoch, train_options.number_of_epochs))
@@ -67,10 +67,10 @@ def train(model: Hidden,
         logging.info('Epoch {} training duration {:.2f} sec'.format(epoch, train_duration))
         logging.info('-' * 40)
         utils.write_losses(os.path.join(this_run_folder, 'train.csv'), training_losses, epoch, train_duration)
-        if tb_logger is not None:
-            tb_logger.save_losses(training_losses, epoch)
-            tb_logger.save_grads(epoch)
-            tb_logger.save_tensors(epoch)
+        # if tb_logger is not None:
+        #     tb_logger.save_losses(training_losses, epoch)
+        #     tb_logger.save_grads(epoch)
+        #     tb_logger.save_tensors(epoch)
 
         first_iteration = True
         validation_losses = defaultdict(AverageMeter)

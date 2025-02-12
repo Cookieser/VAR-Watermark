@@ -17,50 +17,54 @@ from train import train
 os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 
-# nohup python main.py new --name var-watermark --data-dir dataset --batch-size 64 &
-
-
 def main():
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    
 
     parent_parser = argparse.ArgumentParser(description='Training of HiDDeN nets')
     subparsers = parent_parser.add_subparsers(dest='command', help='Sub-parser for commands')
     new_run_parser = subparsers.add_parser('new', help='starts a new run')
-    new_run_parser.add_argument('--data-dir', '-d', required=True, type=str,
-                                help='The directory where the data is stored.')
+    new_run_parser.add_argument('--data-dir', '-d', required=True, type=str,help='The directory where the data is stored.')
     new_run_parser.add_argument('--batch-size', '-b', required=True, type=int, help='The batch size.')
     new_run_parser.add_argument('--epochs', '-e', default=300, type=int, help='Number of epochs to run the simulation.')
     new_run_parser.add_argument('--name', required=True, type=str, help='The name of the experiment.')
+    new_run_parser.add_argument('--device-num', '-n', type=str, default='0',help='GPU device number to use (default: 0)')
 
-    new_run_parser.add_argument('--size', '-s', default=16, type=int,
-                                help='The size of the images (images are square so this is height and width).')
+    new_run_parser.add_argument('--size', '-s', default=16, type=int,help='The size of the images (images are square so this is height and width).')
     new_run_parser.add_argument('--message', '-m', default=30, type=int, help='The length in bits of the watermark.')
     new_run_parser.add_argument('--continue-from-folder', '-c', default='', type=str,
                                 help='The folder from where to continue a previous run. Leave blank if you are starting a new experiment.')
     # parser.add_argument('--tensorboard', dest='tensorboard', action='store_true',
     #                     help='If specified, use adds a Tensorboard log. On by default')
-    new_run_parser.add_argument('--tensorboard', action='store_true',
-                                help='Use to switch on Tensorboard logging.')
-    new_run_parser.add_argument('--enable-fp16', dest='enable_fp16', action='store_true',
-                                help='Enable mixed-precision training.')
+    new_run_parser.add_argument('--tensorboard', action='store_true',help='Use to switch on Tensorboard logging.')
+    new_run_parser.add_argument('--enable-fp16', dest='enable_fp16', action='store_true',help='Enable mixed-precision training.')
 
     new_run_parser.add_argument('--noise', nargs='*', action=NoiseArgParser,
                                 help="Noise layers configuration. Use quotes when specifying configuration, e.g. 'cropout((0.55, 0.6), (0.55, 0.6))'")
 
+
+    new_run_parser.add_argument('--encoder-name', required=True, type=str,help='The name of encoder')
+    new_run_parser.add_argument('--decoder-name', required=True, type=str,help='The name of decoder ')
+    new_run_parser.add_argument('--encoder-decoder-name', required=True, type=str,help='The name of encoder_decoder ')
     new_run_parser.set_defaults(tensorboard=False)
     new_run_parser.set_defaults(enable_fp16=False)
 
+
+
+
     continue_parser = subparsers.add_parser('continue', help='Continue a previous run')
-    continue_parser.add_argument('--folder', '-f', required=True, type=str,
-                                 help='Continue from the last checkpoint in this folder.')
-    continue_parser.add_argument('--data-dir', '-d', required=False, type=str,
-                                 help='The directory where the data is stored. Specify a value only if you want to override the previous value.')
-    continue_parser.add_argument('--epochs', '-e', required=False, type=int,
-                                help='Number of epochs to run the simulation. Specify a value only if you want to override the previous value.')
-    # continue_parser.add_argument('--tensorboard', action='store_true',
-    #                             help='Override the previous setting regarding tensorboard logging.')
+    continue_parser.add_argument('--folder', '-f', required=True, type=str,help='Continue from the last checkpoint in this folder.')
+    continue_parser.add_argument('--data-dir', '-d', required=False, type=str,help='The directory where the data is stored. Specify a value only if you want to override the previous value.')
+    continue_parser.add_argument('--epochs', '-e', required=False, type=int,help='Number of epochs to run the simulation. Specify a value only if you want to override the previous value.')
+    
+    
+    # continue_parser.add_argument('--tensorboard', action='store_true',help='Override the previous setting regarding tensorboard logging.')
 
     args = parent_parser.parse_args()
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.device_num
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+
     checkpoint = None
     loaded_checkpoint_file_name = None
 
@@ -104,6 +108,10 @@ def main():
                                             decoder_loss=5,
                                             encoder_loss=0.7,
                                             adversarial_loss=1e-3,
+                                            encoder_name = args.encoder_name,
+                                            decoder_name = args.decoder_name,
+                                            encoder_decoder_name = args.encoder_decoder_name,
+
                                             enable_fp16=args.enable_fp16
                                             )
 
@@ -137,7 +145,7 @@ def main():
         logging.info(f'Loading checkpoint from file {loaded_checkpoint_file_name}')
         utils.model_from_checkpoint(model, checkpoint)
 
-    logging.info('HiDDeN model: {}\n'.format(model.to_stirng()))
+    logging.info('Model: {}\n'.format(model.to_stirng()))
     logging.info('Model Configuration:\n')
     logging.info(pprint.pformat(vars(hidden_config)))
     logging.info('\nNoise configuration:\n')

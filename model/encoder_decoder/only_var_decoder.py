@@ -1,11 +1,9 @@
 import torch.nn as nn
-from model.encoder import Encoder
-from model.decoder import Decoder
 from options import HiDDenConfiguration
 from noise_layers.noiser import Noiser
-
-
-class EncoderDecoder(nn.Module):
+from model.factory import get_encoder, get_decoder
+from model.encoder_decoder.base_encoder_decoder import BaseEncoderDecoder
+class EncoderDecoder(BaseEncoderDecoder):
     """
     Combines Encoder->Noiser->Decoder into single pipeline.
     The input is the cover image and the watermark message. The module inserts the watermark into the image
@@ -14,13 +12,11 @@ class EncoderDecoder(nn.Module):
     a three-tuple: (encoded_image, noised_image, decoded_message)
     """
     def __init__(self, config: HiDDenConfiguration, noiser: Noiser):
+        super(EncoderDecoder, self).__init__(config, noiser)
 
-        super(EncoderDecoder, self).__init__()
-        self.encoder = Encoder(config)
+        self.encoder = get_encoder(config.encoder_name, config,32)
         self.noiser = noiser
-        self.decoder = Decoder(config)
-        
-
+        self.decoder = get_decoder(config.decoder_name, config,3)
 
     # MSE fhat + decoder only
     # encoder channel 32, decoder channel 3, discriminator channel 32
