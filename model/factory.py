@@ -1,3 +1,5 @@
+from model.discriminator import Discriminator
+
 def get_encoder(encoder_name, config,input_size):
     if encoder_name == 'encoder_cnn':
         from model.encoder.encoder_cnn import Encoder
@@ -13,9 +15,10 @@ def get_decoder(decoder_name, config,input_size):
         raise ValueError(f"Error: {decoder_name}")
 
 
-def get_encoder_decoder(encoder_decoder_name, config,noiser):
-    if encoder_decoder_name == 'encoder_decoder1':
+def get_encoder_decoder_dis(encoder_decoder_name, config,noiser):
+    if encoder_decoder_name == 'only_var_decoder_fhat':
         from model.encoder_decoder.only_var_decoder import EncoderDecoder
-        return EncoderDecoder(config,noiser)
+        discriminator_channel_num = 32
+        return EncoderDecoder(config,noiser),Discriminator(config,32)
     else:
         raise ValueError(f"Error: {encoder_decoder_name}")

@@ -7,7 +7,7 @@ class TrainingOptions:
                  batch_size: int,
                  number_of_epochs: int,
                  train_folder: str, validation_folder: str, runs_folder: str,
-                 start_epoch: int, experiment_name: str):
+                 start_epoch: int, experiment_name: str,device_num,pid):
         self.batch_size = batch_size
         self.number_of_epochs = number_of_epochs
         self.train_folder = train_folder
@@ -15,6 +15,8 @@ class TrainingOptions:
         self.runs_folder = runs_folder
         self.start_epoch = start_epoch
         self.experiment_name = experiment_name
+        self.device_num = device_num
+        self.pid = pid
 
 
 class HiDDenConfiguration():

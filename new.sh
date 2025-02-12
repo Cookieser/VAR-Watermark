@@ -8,4 +8,4 @@ nohup python main.py new \
  --batch-size 8 \
  --encoder-name "encoder_cnn" \
  --decoder-name "decoder_cnn" \
- --encoder-decoder-name "encoder_decoder1" > test.log & 
+ --encoder-decoder-name "only_var_decoder_fhat" > test.log & 

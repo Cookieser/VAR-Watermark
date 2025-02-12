@@ -95,7 +95,9 @@ def main():
             validation_folder=os.path.join(args.data_dir, 'val/val_class'),
             runs_folder=os.path.join('.', 'runs'),
             start_epoch=start_epoch,
-            experiment_name=args.name)
+            experiment_name=args.name,
+            device_num = args.device_num,
+            pid = os.getpid())
 
         noise_config = args.noise if args.noise is not None else []
         hidden_config = HiDDenConfiguration(H=args.size, W=args.size,
@@ -111,7 +113,6 @@ def main():
                                             encoder_name = args.encoder_name,
                                             decoder_name = args.decoder_name,
                                             encoder_decoder_name = args.encoder_decoder_name,
-
                                             enable_fp16=args.enable_fp16
                                             )
 

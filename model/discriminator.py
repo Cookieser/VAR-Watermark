@@ -6,10 +6,12 @@ class Discriminator(nn.Module):
     """
     Discriminator network. Receives an image and has to figure out whether it has a watermark inserted into it, or not.
     """
-    def __init__(self, config: HiDDenConfiguration):
+    def __init__(self, config: HiDDenConfiguration,discriminator_input_channel):
         super(Discriminator, self).__init__()
 
-        layers = [ConvBNRelu(32, config.discriminator_channels)]
+        self.discriminator_input_channel = discriminator_input_channel
+
+        layers = [ConvBNRelu(discriminator_input_channel, config.discriminator_channels)]
         for _ in range(config.discriminator_blocks-1):
             layers.append(ConvBNRelu(config.discriminator_channels, config.discriminator_channels))
 
