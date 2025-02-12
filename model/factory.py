@@ -11,6 +11,9 @@ def get_decoder(decoder_name, config,input_size):
     if decoder_name == 'decoder_cnn':
         from model.decoder.decoder_cnn import Decoder
         return Decoder(config,input_size)
+    if decoder_name == 'decoder_vit':
+        from model.decoder.decoder_vit import Decoder
+        return Decoder(config,input_size)
     else:
         raise ValueError(f"Error: {decoder_name}")
 
@@ -18,7 +21,28 @@ def get_decoder(decoder_name, config,input_size):
 def get_encoder_decoder_dis(encoder_decoder_name, config,noiser):
     if encoder_decoder_name == 'only_var_decoder_fhat':
         from model.encoder_decoder.only_var_decoder import EncoderDecoder
-        discriminator_channel_num = 32
         return EncoderDecoder(config,noiser),Discriminator(config,32)
+
+    # basic method image
+    elif encoder_decoder_name == 'image_encoder_decoder':
+        from model.encoder_decoder.image_encoder_decoder import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,3)
+
+    # basic method fhat 
+    elif encoder_decoder_name == 'fhat_encoder_decoder':
+        from model.encoder_decoder.fhat_encoder_decoder import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,32)
+
+    # image should use vgg
+    elif encoder_decoder_name == 'only_var_decoder_image':
+        from model.encoder_decoder.only_var_decoder_image import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,3)
+
+    # neil method should use var_soft
+    elif encoder_decoder_name == 'var_encoder_decoder':
+        from model.encoder_decoder.var_encoder_decoder import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,32)
+
+
     else:
         raise ValueError(f"Error: {encoder_decoder_name}")

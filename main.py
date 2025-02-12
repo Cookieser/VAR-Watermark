@@ -107,7 +107,7 @@ def main():
                                             use_discriminator=True,
                                             use_vgg=False,
                                             discriminator_blocks=3, discriminator_channels=64,
-                                            decoder_loss=5,
+                                            decoder_loss=2,
                                             encoder_loss=0.7,
                                             adversarial_loss=1e-3,
                                             encoder_name = args.encoder_name,

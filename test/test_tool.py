@@ -78,7 +78,7 @@ def repeat_test(test_func, num_trials=100):
 
 
 
-def save(self,recon_B3HW,output):  
+def save(recon_B3HW,output):  
     chw = torchvision.utils.make_grid(recon_B3HW, nrow=recon_B3HW.shape[0], padding=0, pad_value=1.0)
     chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
     chw = PImage.fromarray(chw.astype(np.uint8))
@@ -88,7 +88,7 @@ def save(self,recon_B3HW,output):
 
 
 
-def draw(file_path,file_name):
+def draw(file_path,file_name,y_low = 0,y_high = 0.5):
     file_path = os.path.join(file_path,file_name)
 
     df = pd.read_csv(file_path)
@@ -104,5 +104,31 @@ def draw(file_path,file_name):
     plt.title("Encoder MSE, Decoder MSE, and Bitwise Error over Epochs")
     plt.legend()
     plt.grid(True)
+    plt.ylim(y_low, y_high)
 
     plt.show()
+
+
+def test_one_method(var,base_path,device,pid,y1=0,y2=0.5):
+    draw(base_path,"train.csv",y1,y2)
+    draw(base_path,"validation.csv",y1,y2)
+    source_image = os.path.join(base_path,f"images/epoch-original-{pid}.pt")
+    fhat = load_fhat(source_image,8,device)
+    image = var.var_decoder(fhat)
+
+    var.save_image(image,"original_picture.png") 
+
+    watermark_image_path = os.path.join(base_path,f"images/epoch-watermark-{pid}.pt")
+
+    try:
+        watermark_image = torch.load(watermark_image_path,weights_only=True)
+        if watermark_image.shape[1] == 3 and watermark_image.shape[2] == 256 and watermark_image.shape[3] == 256:
+            print("Using direct torch.load() method.")
+        else:
+            raise ValueError("Loaded tensor has an unexpected shape.")
+    except Exception as e:
+        print(f"torch.load() failed or shape mismatch: {e}, using load_fhat() instead.")
+        fhat = load_fhat(watermark_image_path, 8, device)
+        watermark_image = var.var_decoder(fhat)
+
+    var.save_image(watermark_image,"tes.png") 
