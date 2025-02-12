@@ -1,4 +1,6 @@
 # test the vgg best decoder abilibity
+# VGG = TRUE
+# decoder weight = 10
 
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate test

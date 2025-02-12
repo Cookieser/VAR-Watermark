@@ -1,3 +1,5 @@
+# decoder weight = 2
+
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate test
 cd ..
