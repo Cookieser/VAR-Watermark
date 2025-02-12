@@ -4,6 +4,9 @@ def get_encoder(encoder_name, config,input_size):
     if encoder_name == 'encoder_cnn':
         from model.encoder.encoder_cnn import Encoder
         return Encoder(config,input_size)
+    elif encoder_name == 'encoder_vit':
+        from model.encoder.encoder_vit import Encoder
+        return Encoder(config,input_size)
     else:
         raise ValueError(f"Error: {encoder_name}")
 
