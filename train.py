@@ -39,6 +39,7 @@ def train(model: Hidden,
         steps_in_epoch = file_count // train_options.batch_size + 1
 
     print_each = 10
+    save_each = 10
     # images_to_save = 8
     #saved_images_size = (512, 512)
 
@@ -72,7 +73,13 @@ def train(model: Hidden,
         #     tb_logger.save_grads(epoch)
         #     tb_logger.save_tensors(epoch)
 
-        first_iteration = True
+        # first_iteration = True
+
+        if epoch % save_each == 0:
+            first_iteration = True  
+        else:
+            first_iteration = False
+
         validation_losses = defaultdict(AverageMeter)
         logging.info('Running validation for epoch {}/{}'.format(epoch, train_options.number_of_epochs))
         #for image, _ in val_data:
@@ -82,12 +89,13 @@ def train(model: Hidden,
             losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message],var)
             for name, loss in losses.items():
                 validation_losses[name].update(loss)
+            
+
             if first_iteration:
                 if hidden_config.enable_fp16:
                     image = image.float()
                     encoded_images = encoded_images.float()
                 
-
                 images_folder = os.path.join(this_run_folder, 'images')
                 os.makedirs(images_folder, exist_ok=True)  
                 filename_watermark = os.path.join(images_folder, 'epoch-watermark-{}.pt'.format(epoch))
@@ -101,6 +109,7 @@ def train(model: Hidden,
 
         utils.log_progress(validation_losses)
         logging.info('-' * 40)
-        utils.save_checkpoint(model, train_options.experiment_name, epoch, os.path.join(this_run_folder, 'checkpoints'))
+        if epoch % save_each == 0:
+            utils.save_checkpoint(model, train_options.experiment_name, epoch, os.path.join(this_run_folder, 'checkpoints'))
         utils.write_losses(os.path.join(this_run_folder, 'validation.csv'), validation_losses, epoch,
                            time.time() - epoch_start)

@@ -92,6 +92,7 @@ class Hidden:
 
             # --------------Train the generator (encoder-decoder) ---------------------
             self.optimizer_enc_dec.zero_grad()
+            
             # target label for encoded images should be 'cover', because we want to fool the discriminator
             d_on_encoded_for_enc = self.discriminator(encoded_images)
             g_loss_adv = self.bce_with_logits_loss(d_on_encoded_for_enc, g_target_label_encoded)

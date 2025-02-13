@@ -9,6 +9,10 @@ class Encoder(BaseEncoder):
     def __init__(self, config: HiDDenConfiguration,input_size):
         super(Encoder, self).__init__(config,input_size)
 
+
+
+        
+
         self.message_length = config.message_length
         self.num_layers     = config.encoder_blocks  
         self.hidden_dim     =  input_size            # 这里将 Transformer 的 d_model 设为 32

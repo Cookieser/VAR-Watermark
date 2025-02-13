@@ -10,6 +10,8 @@ class Encoder(BaseEncoder):
     """
     def __init__(self, config: HiDDenConfiguration,input_size):
         super(Encoder, self).__init__(config,input_size)
+
+
         
         layers = [ConvBNRelu(self.input_size, self.conv_channels)]
 
@@ -18,9 +20,9 @@ class Encoder(BaseEncoder):
             layers.append(layer)
 
         self.conv_layers = nn.Sequential(*layers)
-        self.after_concat_layer = ConvBNRelu(self.conv_channels + 32 + config.message_length, self.conv_channels)
+        self.after_concat_layer = ConvBNRelu(self.conv_channels + self.input_size + config.message_length, self.conv_channels)
 
-        self.final_layer = nn.Conv2d(self.conv_channels, 32, kernel_size=1)
+        self.final_layer = nn.Conv2d(self.conv_channels, self.input_size, kernel_size=1)
 
     def forward(self, image, message):
 

@@ -85,7 +85,7 @@ torch.backends.cudnn.allow_tf32 = bool(tf32)
 torch.backends.cuda.matmul.allow_tf32 = bool(tf32)
 torch.set_float32_matmul_precision('high' if tf32 else 'highest')
 
-
+os.makedirs(save_path, exist_ok=True)
 generated_count = 0
 
 while generated_count < total_samples:
@@ -98,9 +98,11 @@ while generated_count < total_samples:
     with torch.inference_mode():
         with torch.autocast('cuda', enabled=True, dtype=torch.float16, cache_enabled=True):    # using bfloat16 can be faster
             #recon_B3HW = var.autoregressive_infer_cfg(B=B, label_B=label_B, cfg=cfg, top_k=900, top_p=0.95, g_seed=seed, more_smooth=more_smooth)
-            f_hats = var.autoregressive_infer_cfg(B=current_batch_size, label_B=label_B, cfg=cfg, top_k=900, top_p=0.95, g_seed=seed, more_smooth=more_smooth)
+            f_hats,_ = var.autoregressive_infer_cfg(B=current_batch_size, label_B=label_B, cfg=cfg, top_k=900, top_p=0.95, g_seed=seed, more_smooth=more_smooth)
 
     tensor = f_hats[-1]
+   
+
     for i in range(tensor.size(0)):  
         single_tensor = tensor[i].squeeze(0)  # [32, 16, 16]
         file_name = osp.join(save_path, f"image{generated_count + i}.pt")  

@@ -9,6 +9,7 @@ class BaseEncoder(nn.Module,ABC):
         self.conv_channels = config.encoder_channels
         self.num_blocks = config.encoder_blocks
 
+    
         self.input_size = input_size
         
     

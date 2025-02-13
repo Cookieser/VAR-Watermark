@@ -14,7 +14,6 @@ from noise_argparser import NoiseArgParser
 
 from train import train
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 
 def main():
@@ -107,7 +106,7 @@ def main():
                                             use_discriminator=True,
                                             use_vgg=False,
                                             discriminator_blocks=3, discriminator_channels=64,
-                                            decoder_loss=2,
+                                            decoder_loss=1.3,
                                             encoder_loss=0.7,
                                             adversarial_loss=1e-3,
                                             encoder_name = args.encoder_name,
