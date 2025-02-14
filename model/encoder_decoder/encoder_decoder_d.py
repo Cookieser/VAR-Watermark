@@ -16,16 +16,13 @@ class EncoderDecoder(BaseEncoderDecoder):
     
     def forward(self, fhat, message,var,batch):
 
-        
+        decoded_message = self.decoder(fhat) # [B,L]
 
-        decoded_message = self.decoder(fhat) #[B,L]
+        cat_message = torch.cat([decoded_message, message], dim=1) # [B,2L]
 
-        cat_message = torch.cat([decoded_message, message], dim=1) #[B,2L]
-
-        add_watermark_fhat = self.encoder(fhat, cat_message)#[B,32,16,16]
+        add_watermark_fhat = self.encoder(fhat, cat_message) # [B,32,16,16]
 
         cat_watermark_fhat = fhat + add_watermark_fhat
-
 
         noised_and_cover = self.noiser([cat_watermark_fhat, fhat])
 
@@ -33,5 +30,4 @@ class EncoderDecoder(BaseEncoderDecoder):
 
         final_message = self.decoder(noised_fhat)
         
-
         return fhat,cat_watermark_fhat, noised_fhat, final_message

@@ -53,7 +53,7 @@ class Hidden:
             discrim_final.weight.register_hook(tb_logger.grad_hook_by_name('grads/discrim_out'))
 
 
-    def train_on_batch(self, batch: list,var):
+    def train_on_batch(self, batch: list,var,encoder_weight, decoder_weight):
         """
         Trains the network on a single batch consisting of images and messages
         :param batch: batch of training data, in the form [images, messages]
@@ -105,8 +105,9 @@ class Hidden:
                 g_loss_enc = self.mse_loss(vgg_on_cov, vgg_on_enc)
 
             g_loss_dec = self.mse_loss(decoded_messages, messages)
-            g_loss = self.config.adversarial_loss * g_loss_adv + self.config.encoder_loss * g_loss_enc \
-                     + self.config.decoder_loss * g_loss_dec
+
+            g_loss = self.config.adversarial_loss * g_loss_adv + encoder_weight * g_loss_enc \
+                     + decoder_weight * g_loss_dec
 
             g_loss.backward()
             self.optimizer_enc_dec.step()
@@ -126,7 +127,7 @@ class Hidden:
         }
         return losses, (encoded_images, noised_images, decoded_messages)
 
-    def validate_on_batch(self, batch: list,var):
+    def validate_on_batch(self, batch: list,var,encoder_weight, decoder_weight):
         """
         Runs validation on a single batch of data consisting of images and messages
         :param batch: batch of validation data, in form [images, messages]
@@ -177,8 +178,8 @@ class Hidden:
                 g_loss_enc = self.mse_loss(vgg_on_cov, vgg_on_enc)
 
             g_loss_dec = self.mse_loss(decoded_messages, messages)
-            g_loss = self.config.adversarial_loss * g_loss_adv + self.config.encoder_loss * g_loss_enc \
-                     + self.config.decoder_loss * g_loss_dec
+            g_loss = self.config.adversarial_loss * g_loss_adv + encoder_weight * g_loss_enc \
+                     + decoder_weight * g_loss_dec
 
         decoded_rounded = decoded_messages.detach().cpu().numpy().round().clip(0, 1)
         bitwise_avg_err = np.sum(np.abs(decoded_rounded - messages.detach().cpu().numpy())) / (

@@ -40,12 +40,14 @@ def train(model: Hidden,
 
     print_each = 10
     save_each = 10
-    # images_to_save = 8
-    #saved_images_size = (512, 512)
 
     for epoch in range(train_options.start_epoch, train_options.number_of_epochs + 1):
+        encoder_weight, decoder_weight = weight_change(hidden_config.encoder_loss,hidden_config.decoder_loss,epoch);
         logging.info('\nStarting epoch {}/{}'.format(epoch, train_options.number_of_epochs))
         logging.info('Batch size = {}\nSteps in epoch = {}'.format(train_options.batch_size, steps_in_epoch))
+        logging.info('Loss weight: encoder: {}  decoder:{}\n '.format(encoder_weight, decoder_weight))
+
+
         training_losses = defaultdict(AverageMeter)
         epoch_start = time.time()
         step = 1
@@ -53,7 +55,7 @@ def train(model: Hidden,
         for image, _ in tqdm(train_data, desc="Processing train data"):
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
-            losses, _ = model.train_on_batch([image, message],var)
+            losses, _ = model.train_on_batch([image, message],var,encoder_weight, decoder_weight)
 
             for name, loss in losses.items():
                 training_losses[name].update(loss)
@@ -68,12 +70,6 @@ def train(model: Hidden,
         logging.info('Epoch {} training duration {:.2f} sec'.format(epoch, train_duration))
         logging.info('-' * 40)
         utils.write_losses(os.path.join(this_run_folder, 'train.csv'), training_losses, epoch, train_duration)
-        # if tb_logger is not None:
-        #     tb_logger.save_losses(training_losses, epoch)
-        #     tb_logger.save_grads(epoch)
-        #     tb_logger.save_tensors(epoch)
-
-        # first_iteration = True
 
         if epoch % save_each == 0:
             first_iteration = True  
@@ -86,7 +82,7 @@ def train(model: Hidden,
         for image, _ in tqdm(val_data, desc="Processing validation data"):
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
-            losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message],var)
+            losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message],var,encoder_weight, decoder_weight)
             for name, loss in losses.items():
                 validation_losses[name].update(loss)
             
@@ -113,3 +109,13 @@ def train(model: Hidden,
             utils.save_checkpoint(model, train_options.experiment_name, epoch, os.path.join(this_run_folder, 'checkpoints'))
         utils.write_losses(os.path.join(this_run_folder, 'validation.csv'), validation_losses, epoch,
                            time.time() - epoch_start)
+
+
+def weight_change(weight1,weight2,epoch):
+    if(epoch < 1000):
+        encoder_weight = weight1
+        decoder_weight = weight2
+    else:
+        encoder_weight = weight2
+        decoder_weight = weight1
+    return encoder_weight,decoder_weight
