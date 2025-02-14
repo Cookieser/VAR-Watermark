@@ -14,7 +14,7 @@ class EncoderDecoder(BaseEncoderDecoder):
         self.decoder = get_decoder(config.decoder_name, config,32)
 
     
-    def forward(self, fhat, message,var,batch):
+    def forward(self, fhat, message, var, batch):
 
         decoded_message = self.decoder(fhat) # [B,L]
 

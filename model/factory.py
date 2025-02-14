@@ -7,8 +7,8 @@ def get_encoder(encoder_name, config,input_size):
     elif encoder_name == 'encoder_vit':
         from model.encoder.encoder_vit import Encoder
         return Encoder(config,input_size)
-    elif encoder_name == 'encoder_d':
-        from model.encoder.encoder_d import Encoder
+    elif encoder_name == 'encoder_De_END':
+        from model.encoder.encoder_De_END import Encoder
         return Encoder(config,input_size)
     else:
         raise ValueError(f"Error: {encoder_name}")
@@ -20,8 +20,8 @@ def get_decoder(decoder_name, config,input_size):
     elif decoder_name == 'decoder_vit':
         from model.decoder.decoder_vit import Decoder
         return Decoder(config,input_size)
-    elif decoder_name == 'decoder_d':
-        from model.decoder.decoder_d import Decoder
+    elif decoder_name == 'decoder_De_END':
+        from model.decoder.decoder_De_END import Decoder
         return Decoder(config,input_size)
     else:
         raise ValueError(f"Error: {decoder_name}")
@@ -52,8 +52,8 @@ def get_encoder_decoder_dis(encoder_decoder_name, config,noiser):
         from model.encoder_decoder.var_encoder_decoder import EncoderDecoder
         return EncoderDecoder(config,noiser),Discriminator(config,32)
     
-    elif encoder_decoder_name == 'encoder_decoder_d':
-        from model.encoder_decoder.encoder_decoder_d import EncoderDecoder
+    elif encoder_decoder_name == 'encoder_decoder_De_END':
+        from model.encoder_decoder.encoder_decoder_De_END import EncoderDecoder
         return EncoderDecoder(config,noiser),Discriminator(config,32)
 
 

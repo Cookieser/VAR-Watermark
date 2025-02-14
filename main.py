@@ -44,6 +44,9 @@ def main():
     new_run_parser.add_argument('--encoder-name', required=True, type=str,help='The name of encoder')
     new_run_parser.add_argument('--decoder-name', required=True, type=str,help='The name of decoder ')
     new_run_parser.add_argument('--encoder-decoder-name', required=True, type=str,help='The name of encoder_decoder ')
+    new_run_parser.add_argument('--encoder-weight', default=0.7, type=float,help='The init weight of the encoder ')
+    new_run_parser.add_argument('--decoder-weight', default=1, type=float,help='The init weight of the decoder ')
+    new_run_parser.add_argument('--adversarial-weight', default=1e-3, type=float,help='The init weight of the adversarial ')
     new_run_parser.set_defaults(tensorboard=False)
     new_run_parser.set_defaults(enable_fp16=False)
 
@@ -106,9 +109,9 @@ def main():
                                             use_discriminator=True,
                                             use_vgg=False,
                                             discriminator_blocks=3, discriminator_channels=64,
-                                            decoder_loss=10,
-                                            encoder_loss=1,
-                                            adversarial_loss=1e-4,
+                                            decoder_loss=args.decoder_weight,
+                                            encoder_loss=args.encoder_weight,
+                                            adversarial_loss=args.adversarial_weight,
                                             encoder_name = args.encoder_name,
                                             decoder_name = args.decoder_name,
                                             encoder_decoder_name = args.encoder_decoder_name,

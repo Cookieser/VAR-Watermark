@@ -112,10 +112,4 @@ def train(model: Hidden,
 
 
 def weight_change(weight1,weight2,epoch):
-    if(epoch < 1000):
-        encoder_weight = weight1
-        decoder_weight = weight2
-    else:
-        encoder_weight = weight2
-        decoder_weight = weight1
-    return encoder_weight,decoder_weight
+    return weight1,weight2
