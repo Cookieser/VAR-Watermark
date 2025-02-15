@@ -110,6 +110,13 @@ class Hidden:
                      + decoder_weight * g_loss_dec
 
             g_loss.backward()
+
+
+            # print("images grad mean:", images.grad.mean() if images.grad is not None else "None")
+            # print("encoded_images grad mean:", encoded_images.grad.mean() if encoded_images.grad is not None else "None")
+            # print("noised_images grad mean:", noised_images.grad.mean() if noised_images.grad is not None else "None")
+            # print("decoded_messages grad mean:", decoded_messages.grad.mean() if decoded_messages.grad is not None else "None")
+
             self.optimizer_enc_dec.step()
 
         decoded_rounded = decoded_messages.detach().cpu().numpy().round().clip(0, 1)

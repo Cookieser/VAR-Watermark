@@ -12,14 +12,14 @@ class EncoderDecoder(BaseEncoderDecoder):
         self.noiser = noiser
         self.decoder = get_decoder(config.decoder_name, config,3)
 
-    def forward(self, image, message,var,batch):
+    # def forward(self, image, message,var,batch):
 
-        encoded_image = self.encoder(image, message)
+    #     encoded_image = self.encoder(image, message)
 
-        noised_and_cover = self.noiser([encoded_image, image])
+    #     noised_and_cover = self.noiser([encoded_image, image])
 
-        noised_image = noised_and_cover[0]
+    #     noised_image = noised_and_cover[0]
 
-        decoded_message = self.decoder(noised_image)
+    #     decoded_message = self.decoder(noised_image)
 
-        return image,encoded_image, noised_image, decoded_message
+    #     return image,encoded_image, noised_image, decoded_message

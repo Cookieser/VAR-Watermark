@@ -9,8 +9,11 @@ from collections import defaultdict
 from options import *
 from model.hidden import Hidden
 from average_meter import AverageMeter
-from VAR_model.var_use import VarTool
+from VAR_model_soft.var_use import VarTool
 from tqdm import tqdm
+
+
+
 def train(model: Hidden,
           device: torch.device,
           hidden_config: HiDDenConfiguration,
@@ -45,14 +48,14 @@ def train(model: Hidden,
         encoder_weight, decoder_weight = weight_change(hidden_config.encoder_loss,hidden_config.decoder_loss,epoch);
         logging.info('\nStarting epoch {}/{}'.format(epoch, train_options.number_of_epochs))
         logging.info('Batch size = {}\nSteps in epoch = {}'.format(train_options.batch_size, steps_in_epoch))
-        logging.info('Loss weight: encoder: {}  decoder:{}\n '.format(encoder_weight, decoder_weight))
+        logging.info('Loss Weight: encoder: {}  decoder:{}\n '.format(encoder_weight, decoder_weight))
 
 
         training_losses = defaultdict(AverageMeter)
         epoch_start = time.time()
         step = 1
-        #for image, _ in train_data:
-        for image, _ in tqdm(train_data, desc="Processing train data"):
+        
+        for image, _ in train_data:
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
             losses, _ = model.train_on_batch([image, message],var,encoder_weight, decoder_weight)
@@ -78,8 +81,8 @@ def train(model: Hidden,
 
         validation_losses = defaultdict(AverageMeter)
         logging.info('Running validation for epoch {}/{}'.format(epoch, train_options.number_of_epochs))
-        #for image, _ in val_data:
-        for image, _ in tqdm(val_data, desc="Processing validation data"):
+       
+        for image, _ in val_data:
             image = image.to(device)
             message = torch.Tensor(np.random.choice([0, 1], (image.shape[0], hidden_config.message_length))).to(device)
             losses, (encoded_images, noised_images, decoded_messages) = model.validate_on_batch([image, message],var,encoder_weight, decoder_weight)

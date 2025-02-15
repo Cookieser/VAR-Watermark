@@ -1,4 +1,3 @@
-
 SCRIPT_NAME=$(basename "$0")
 
 EXPERIMENT_NAME="${SCRIPT_NAME%.sh}"
@@ -11,13 +10,13 @@ cd ..
 
 nohup python main.py new \
  --name "$EXPERIMENT_NAME" \
- --device-num 6 \
- --epochs 300 \
+ --device-num  7\
+ --epochs 400 \
  --data-dir "/home/yw699/codes/DATASET/fhat" \
- --batch-size 64 \
+ --batch-size 8 \
  --encoder-weight 1\
  --decoder-weight 10\
  --adversarial-weight 0.0001\
  --encoder-name "encoder_De_END" \
- --decoder-name "decode_De_END" \
- --encoder-decoder-name "encoder_decoder_De_END" > "$EXPERIMENT_NAME.log" &
+ --decoder-name "decoder_De_END" \
+ --encoder-decoder-name "var_ed_encoder_decoder_De_END" > "$EXPERIMENT_NAME.log" &

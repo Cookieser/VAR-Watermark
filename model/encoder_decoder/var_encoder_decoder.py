@@ -10,22 +10,35 @@ class EncoderDecoder(BaseEncoderDecoder):
 
         self.encoder = get_encoder(config.encoder_name, config,32)
         self.noiser = noiser
-        self.decoder = get_decoder(config.decoder_name, config,3)
+        self.decoder = get_decoder(config.decoder_name, config,32)
 
-    # def forward(self, embedding, message,var,batch):  
+    def forward(self, embedding, message,var,batch):  
 
-    #     original_image = var.embed_to_image(embedding)
+        original_image = var.var_decoder(embedding)
 
-    #     encoded_embedding = self.encoder(embedding, message) # [B, 32, 16, 16]
+        encoded_embedding = self.encoder(embedding, message) 
 
-    #     encoded_image = var.embed_to_image(encoded_embedding) # [B, 3, 256, 256]
+        # encoded_embedding.retain_grad()
+        
+        encoded_image = var.var_decoder(encoded_embedding) 
+        # encoded_image.retain_grad()
+        
 
-    #     noised_and_cover = self.noiser([encoded_image, original_image]) # [B, 3, 256, 256]
+        noised_and_cover = self.noiser([encoded_image, original_image]) 
 
-    #     noised_image = noised_and_cover[0]
+        noised_image = noised_and_cover[0]
 
-    #     noised_image_embedding = var.image_to_embed(noised_image,batch) # [B, 32, 16, 16]
+        # noised_image.retain_grad()
+        
 
-    #     decoded_message = self.decoder(noised_image_embedding)
+        noised_image_embedding = var.var_encoder(noised_image) 
 
-    #     return embedding,encoded_embedding, noised_image_embedding, decoded_message
+        # noised_image_embedding.retain_grad()
+        
+
+        decoded_message = self.decoder(noised_image_embedding)
+
+        # decoded_message.retain_grad()
+        
+
+        return embedding,encoded_embedding, noised_image_embedding, decoded_message
