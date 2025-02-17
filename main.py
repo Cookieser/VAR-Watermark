@@ -57,8 +57,14 @@ def main():
     continue_parser.add_argument('--folder', '-f', required=True, type=str,help='Continue from the last checkpoint in this folder.')
     continue_parser.add_argument('--data-dir', '-d', required=False, type=str,help='The directory where the data is stored. Specify a value only if you want to override the previous value.')
     continue_parser.add_argument('--epochs', '-e', required=False, type=int,help='Number of epochs to run the simulation. Specify a value only if you want to override the previous value.')
-    
-    
+    continue_parser.add_argument('--encoder-name', required=True, type=str,help='The name of encoder')
+    continue_parser.add_argument('--decoder-name', required=True, type=str,help='The name of decoder ')
+    continue_parser.add_argument('--encoder-decoder-name', required=True, type=str,help='The name of encoder_decoder ')
+    continue_parser.add_argument('--encoder-weight', default=0.7, type=float,help='The init weight of the encoder ')
+    continue_parser.add_argument('--decoder-weight', default=1, type=float,help='The init weight of the decoder ')
+    continue_parser.add_argument('--adversarial-weight', default=1e-3, type=float,help='The init weight of the adversarial ')
+    continue_parser.add_argument('--device-num', '-n', type=str, default='0',help='GPU device number to use (default: 0)')
+
     # continue_parser.add_argument('--tensorboard', action='store_true',help='Override the previous setting regarding tensorboard logging.')
 
     args = parent_parser.parse_args()
@@ -74,6 +80,13 @@ def main():
         this_run_folder = args.folder
         options_file = os.path.join(this_run_folder, 'options-and-config.pickle')
         train_options, hidden_config, noise_config = utils.load_options(options_file)
+
+        train_options.pid = os.getpid()
+        train_options.device_num = args.device_num
+        hidden_config.decoder_loss = args.decoder_weight
+        hidden_config.encoder_loss = args.encoder_weight
+
+
         checkpoint, loaded_checkpoint_file_name = utils.load_last_checkpoint(os.path.join(this_run_folder, 'checkpoints'))
         train_options.start_epoch = checkpoint['epoch'] + 1
         if args.data_dir is not None:
@@ -120,6 +133,9 @@ def main():
 
         this_run_folder = utils.create_folder_for_run(train_options.runs_folder, args.name)
         with open(os.path.join(this_run_folder, 'options-and-config.pickle'), 'wb+') as f:
+            print("train_options:", train_options)
+            print("noise_config:", noise_config)
+            print("hidden_config:", hidden_config)
             pickle.dump(train_options, f)
             pickle.dump(noise_config, f)
             pickle.dump(hidden_config, f)
