@@ -112,13 +112,41 @@ class VarTool:
         return f_hats,hs
 
     
-    def save_image(self,recon_B3HW,output):  
+    def save_image(self,recon_B3HW,output="temp.png"):  
         chw = torchvision.utils.make_grid(recon_B3HW, nrow=recon_B3HW.shape[0], padding=0, pad_value=1.0)
         chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
         chw = PImage.fromarray(chw.astype(np.uint8))
         chw.save(output)
         display(chw)
         print(f"Image({recon_B3HW.size()}) saved to {output}")
+
+    
+    def image_to_f(self,image):
+        image = image.to(self.device)
+        assert image.shape[1:] == (3, 256, 256), f"Expected shape (*, 3, 256, 256), but got {image.shape}"
+        image = image * 2 - 1
+        f = self.vqvae.quant_conv(self.vqvae.encoder(image))
+        print(f.shape)
+        #assert fhat.shape[1:] == (32, 16, 16), f"Expected shape (*, 32, 16, 16), but got {fhat.shape}"
+        return f
+
+
+
+    def f_to_image(self,f):
+        
+        f = f.to(self.device) 
+        fhat = self.vqvae.quantize.f_to_idxBl_or_fhat(f, to_fhat=True)[-1]
+
+        assert fhat.shape[1:] == (32, 16, 16), f"Expected shape (*, 32, 16, 16), but got {fhat.shape}"
+
+        recon_B3HW = self.vqvae.decoder(self.vqvae.post_quant_conv(fhat)).clamp(-1, 1)
+
+        recon_B3HW = (recon_B3HW + 1) * 0.5
+        assert recon_B3HW.shape[1:] == (3, 256, 256), f"Expected shape (*, 3, 256, 256), but got {recon_B3HW.shape}"
+        return recon_B3HW 
+
+    
+
 
 
 

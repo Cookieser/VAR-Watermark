@@ -78,12 +78,13 @@ def repeat_test(test_func, num_trials=100):
 
 
 
-def save(recon_B3HW,output="temp.png"):  
-    chw = torchvision.utils.make_grid(recon_B3HW, nrow=recon_B3HW.shape[0], padding=0, pad_value=1.0)
-    chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
-    chw = PImage.fromarray(chw.astype(np.uint8))
-    chw.save(output)
-    print(f"Image({recon_B3HW.size()}) saved to {output}")
+# def save(recon_B3HW,output="temp.png"):  
+#     chw = torchvision.utils.make_grid(recon_B3HW, nrow=recon_B3HW.shape[0], padding=0, pad_value=1.0)
+#     chw = chw.permute(1, 2, 0).mul_(255).cpu().numpy()
+#     chw = PImage.fromarray(chw.astype(np.uint8))
+#     chw.display()
+#     chw.save(output)
+#     print(f"Image({recon_B3HW.size()}) saved to {output}")
 
 
 
