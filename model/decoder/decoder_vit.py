@@ -30,7 +30,7 @@ class Decoder(BaseDecoder):
 
 
         self.cnn_layers = nn.Sequential(
-            ConvBNRelu(3, 64),
+            ConvBNRelu(32, 64),
             ConvBNRelu(64, 128),
             ConvBNRelu(128, 256),
             ConvBNRelu(256, 512)

@@ -8,12 +8,14 @@ conda activate test
 cd ..
 
 
-nohup python main.py continue \
- --device-num 7 \
- --epochs 400 \
- --folder "/home/yw699/codes/VAR-Watermark/runs/var_ed_v3 2025.02.14--20-25-13"\
- --encoder-weight 10\
- --decoder-weight 1\
+nohup python main.py new \
+ --name "$EXPERIMENT_NAME" \
+ --device-num  2\
+ --epochs 300 \
+ --data-dir "/home/yw699/codes/DATASET/fhat" \
+ --batch-size 8 \
+ --encoder-weight 1\
+ --decoder-weight 5\
  --adversarial-weight 0.0001\
  --encoder-name "encoder_De_END" \
  --decoder-name "decoder_De_END" \

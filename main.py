@@ -133,9 +133,6 @@ def main():
 
         this_run_folder = utils.create_folder_for_run(train_options.runs_folder, args.name)
         with open(os.path.join(this_run_folder, 'options-and-config.pickle'), 'wb+') as f:
-            print("train_options:", train_options)
-            print("noise_config:", noise_config)
-            print("hidden_config:", hidden_config)
             pickle.dump(train_options, f)
             pickle.dump(noise_config, f)
             pickle.dump(hidden_config, f)

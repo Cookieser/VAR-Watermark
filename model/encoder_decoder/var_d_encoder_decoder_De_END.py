@@ -33,4 +33,4 @@ class EncoderDecoder(BaseEncoderDecoder):
 
         decoded_message = self.decoder(noised_image)
 
-        return fhat,cat_watermark_fhat, noised_image, decoded_message
+        return fhat,cat_watermark_fhat,fhat,cat_watermark_fhat, noised_image, decoded_message

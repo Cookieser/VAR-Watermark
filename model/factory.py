@@ -58,7 +58,7 @@ def get_encoder_decoder_dis(encoder_decoder_name, config,noiser):
 
     elif encoder_decoder_name == 'var_ed_encoder_decoder_De_END':
         from model.encoder_decoder.var_ed_encoder_decoder_De_END import EncoderDecoder
-        return EncoderDecoder(config,noiser),Discriminator(config,32)
+        return EncoderDecoder(config,noiser),Discriminator(config,3)
 
     elif encoder_decoder_name == 'var_d_encoder_decoder_De_END':
         from model.encoder_decoder.var_d_encoder_decoder_De_END import EncoderDecoder

@@ -115,4 +115,5 @@ def train(model: Hidden,
 
 
 def weight_change(weight1,weight2,epoch):
+    
     return weight1,weight2

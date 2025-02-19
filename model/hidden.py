@@ -75,16 +75,16 @@ class Hidden:
             
 
             # train on fake
-            images, encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
+            images, encoded_images,discriminator_images,discriminator_encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
             #encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
 
-            d_on_cover = self.discriminator(images)
+            d_on_cover = self.discriminator(discriminator_images)
             d_loss_on_cover = self.bce_with_logits_loss(d_on_cover, d_target_label_cover)
             d_loss_on_cover.backward()
 
 
 
-            d_on_encoded = self.discriminator(encoded_images.detach())
+            d_on_encoded = self.discriminator(discriminator_encoded_images.detach())
             d_loss_on_encoded = self.bce_with_logits_loss(d_on_encoded, d_target_label_encoded)
 
             d_loss_on_encoded.backward()
@@ -94,7 +94,7 @@ class Hidden:
             self.optimizer_enc_dec.zero_grad()
             
             # target label for encoded images should be 'cover', because we want to fool the discriminator
-            d_on_encoded_for_enc = self.discriminator(encoded_images)
+            d_on_encoded_for_enc = self.discriminator(discriminator_encoded_images)
             g_loss_adv = self.bce_with_logits_loss(d_on_encoded_for_enc, g_target_label_encoded)
 
             if self.vgg_loss == None:
@@ -164,17 +164,17 @@ class Hidden:
             
 
             # change the images, since the embedding and image
-            images, encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
+            images, encoded_images,discriminator_images,discriminator_encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages,var,batch_size)
             #encoded_images, noised_images, decoded_messages = self.encoder_decoder(images, messages)
 
 
-            d_on_cover = self.discriminator(images)
+            d_on_cover = self.discriminator(discriminator_images)
             d_loss_on_cover = self.bce_with_logits_loss(d_on_cover, d_target_label_cover)
 
-            d_on_encoded = self.discriminator(encoded_images)
+            d_on_encoded = self.discriminator(discriminator_encoded_images)
             d_loss_on_encoded = self.bce_with_logits_loss(d_on_encoded, d_target_label_encoded)
 
-            d_on_encoded_for_enc = self.discriminator(encoded_images)
+            d_on_encoded_for_enc = self.discriminator(discriminator_encoded_images)
             g_loss_adv = self.bce_with_logits_loss(d_on_encoded_for_enc, g_target_label_encoded)
 
             if self.vgg_loss is None:

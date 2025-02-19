@@ -27,7 +27,6 @@ class Decoder(BaseDecoder):
         self.linear = nn.Linear(config.message_length, config.message_length)
 
     def forward(self, image_with_wm):
-        # [B,input_size,H,W]
         x = self.layers(image_with_wm) 
         # the output is of shape b x c x 1 x 1, and we want to squeeze out the last two dummy dimensions and make
         # the tensor of shape b x c. If we just call squeeze_() it will also squeeze the batch dimension when b=1.
