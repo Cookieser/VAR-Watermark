@@ -20,13 +20,17 @@ import torchvision.transforms as transforms
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def load_hidden(options_file_path,checkpoint_file_path,device):
+def load_hidden(base_path,checkpoint_file_path,device):
+
+    checkpoint_file_path = "checkpoints/"+checkpoint_file_path
+    options_file_path = os.path.join(base_path,"options-and-config.pickle")
+    checkpoint_file_path = os.path.join(base_path,checkpoint_file_path)
     train_options, hidden_config, noise_config = utils.load_options(options_file_path)
     noiser = Noiser(noise_config,device)
     checkpoint = torch.load(checkpoint_file_path,weights_only=True)
     hidden_net = Hidden(hidden_config, device, noiser, None)
     utils.model_from_checkpoint(hidden_net, checkpoint)
-    return hidden_net.encoder_decoder.encoder, hidden_net.encoder_decoder.decoder
+    return hidden_net, hidden_net.encoder_decoder.encoder, hidden_net.encoder_decoder.decoder
 
 
 
@@ -59,11 +63,11 @@ def get_watermark(image,hidden_decoder,device):
 
 
 
-def cal_error(decoded_message,message):
+def cal_error(decoded_message,message,batch_size):
     
     decoded_rounded = decoded_message.detach().cpu().numpy().round().clip(0, 1)
     message_detached = message.detach().cpu().numpy()
-    bitwise_avg_err = np.sum(np.abs(decoded_rounded - message.detach().cpu().numpy()))/(fhat.shape[0] * message.shape[1])
+    bitwise_avg_err = np.sum(np.abs(decoded_rounded - message.detach().cpu().numpy()))/(batch_size * message.shape[1])
     return bitwise_avg_err
 
 
@@ -133,3 +137,12 @@ def test_one_method(var,base_path,device,pid,y1=0,y2=0.5):
         watermark_image = var.var_decoder(fhat)
 
     var.save_image(watermark_image,"tes.png") 
+
+
+def de_end_add(message,fhat,encoder,decoder,device):
+    fhat = fhat.to(device)
+    message2 = get_watermark(fhat,decoder,device)
+    cat_message = torch.cat([message2, message], dim=1)
+    fhat_w = add_watermark(fhat,cat_message,encoder,device)
+    cat_fhat = fhat + fhat_w
+    return cat_fhat

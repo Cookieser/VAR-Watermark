@@ -33,3 +33,17 @@ nohup python main.py new \
 #  --encoder-name "encoder_De_END" \
 #  --decoder-name "decoder_De_END" \
 #  --encoder-decoder-name "var_ed_encoder_decoder_De_END" > "$EXPERIMENT_NAME.log" &
+
+
+
+# nohup python main.py continue \
+#  --device-num 7 \
+#  --epochs 300 \
+#  --folder "/home/yw699/codes/VAR-Watermark/runs/var_ed_v4.1 2025.02.17--20-03-29"\
+#  --data-dir "/home/yw699/codes/DATASET/fhat2"\
+#  --encoder-weight 1\
+#  --decoder-weight 10\
+#  --adversarial-weight 0.0001\
+#  --encoder-name "encoder_De_END" \
+#  --decoder-name "decoder_De_END" \
+#  --encoder-decoder-name "var_d_encoder_decoder_De_END" > "$EXPERIMENT_NAME.log" &

@@ -42,10 +42,10 @@ def train(model: Hidden,
         steps_in_epoch = file_count // train_options.batch_size + 1
 
     print_each = 10
-    save_each = 10
+    save_each = 5
 
     for epoch in range(train_options.start_epoch, train_options.number_of_epochs + 1):
-        encoder_weight, decoder_weight = weight_change(hidden_config.encoder_loss,hidden_config.decoder_loss,epoch);
+        encoder_weight, decoder_weight = weight_change(hidden_config.encoder_loss,hidden_config.decoder_loss,epoch,train_options.number_of_epochs,train_options.weight_change_method,train_options.upDown);
         logging.info('\nStarting epoch {}/{}'.format(epoch, train_options.number_of_epochs))
         logging.info('Batch size = {}\nSteps in epoch = {}'.format(train_options.batch_size, steps_in_epoch))
         logging.info('Loss Weight: encoder: {}  decoder:{}\n '.format(encoder_weight, decoder_weight))
@@ -114,6 +114,32 @@ def train(model: Hidden,
                            time.time() - epoch_start)
 
 
-def weight_change(weight1,weight2,epoch):
+def weight_change(weight1_start,weight2_start,epoch,max_epoch, method,upDown = True):
+
+    alpha = 9
+    decay_rate = 0.1
+    
+    if method == "linear":
+        weight =  epoch / max_epoch
+
+    elif method == "exp":
+        
+        weight = 1 - np.exp(-decay_rate * epoch)
+
+    elif method == "cosine": 
+        weight= 0.5 * (1 - np.cos(np.pi * epoch / max_epoch))
+
+    elif method == "vanilla":
+        weight= 0 
+
+    else:
+        raise ValueError("Unsupported method! Choose from: linear, exp, cosine")
+
+    if(upDown):
+        weight1 = weight1_start + weight * alpha
+        weight2 = weight2_start - weight * alpha
+    else:
+        weight1 = weight1_start - weight * alpha
+        weight2 = weight2_start + weight * alpha
     
     return weight1,weight2

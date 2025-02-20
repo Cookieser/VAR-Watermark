@@ -189,8 +189,7 @@ class Hidden:
                      + decoder_weight * g_loss_dec
 
         decoded_rounded = decoded_messages.detach().cpu().numpy().round().clip(0, 1)
-        bitwise_avg_err = np.sum(np.abs(decoded_rounded - messages.detach().cpu().numpy())) / (
-                batch_size * messages.shape[1])
+        bitwise_avg_err = np.sum(np.abs(decoded_rounded - messages.detach().cpu().numpy())) / (batch_size * messages.shape[1])
 
         losses = {
             'loss           ': g_loss.item(),

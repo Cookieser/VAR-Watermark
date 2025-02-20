@@ -47,6 +47,8 @@ def main():
     new_run_parser.add_argument('--encoder-weight', default=0.7, type=float,help='The init weight of the encoder ')
     new_run_parser.add_argument('--decoder-weight', default=1, type=float,help='The init weight of the decoder ')
     new_run_parser.add_argument('--adversarial-weight', default=1e-3, type=float,help='The init weight of the adversarial ')
+    new_run_parser.add_argument('--weight-change-method', default="vanilla", type=str,help='The method of changing weight in the training process')
+    new_run_parser.add_argument('--upDown', default=True,type= bool,help='The encoder weight up & the decoder weight down when using the changing-weight training')
     new_run_parser.set_defaults(tensorboard=False)
     new_run_parser.set_defaults(enable_fp16=False)
 
@@ -64,6 +66,9 @@ def main():
     continue_parser.add_argument('--decoder-weight', default=1, type=float,help='The init weight of the decoder ')
     continue_parser.add_argument('--adversarial-weight', default=1e-3, type=float,help='The init weight of the adversarial ')
     continue_parser.add_argument('--device-num', '-n', type=str, default='0',help='GPU device number to use (default: 0)')
+    continue_parser.add_argument('--weight-change-method', default="vanilla", type=str,help='The method of changing weight in the training process')
+    continue_parser.add_argument('--upDown', default=True,type= bool,help='The encoder weight up & the decoder weight down when using the changing-weight training')
+    new_run_parser.set_defaults(tensorboard=False)
 
     # continue_parser.add_argument('--tensorboard', action='store_true',help='Override the previous setting regarding tensorboard logging.')
 
@@ -79,7 +84,14 @@ def main():
     if args.command == 'continue':
         this_run_folder = args.folder
         options_file = os.path.join(this_run_folder, 'options-and-config.pickle')
+
         train_options, hidden_config, noise_config = utils.load_options(options_file)
+
+        if not hasattr(train_options, "weight_change_method"):
+            train_options.weight_change_method = args.weight_change_method
+
+        if not hasattr(train_options, "upDown"):
+            train_options.upDown = args.upDown
 
         train_options.pid = os.getpid()
         train_options.device_num = args.device_num
@@ -90,8 +102,8 @@ def main():
         checkpoint, loaded_checkpoint_file_name = utils.load_last_checkpoint(os.path.join(this_run_folder, 'checkpoints'))
         train_options.start_epoch = checkpoint['epoch'] + 1
         if args.data_dir is not None:
-            train_options.train_folder = os.path.join(args.data_dir, 'train')
-            train_options.validation_folder = os.path.join(args.data_dir, 'val')
+            train_options.train_folder = os.path.join(args.data_dir, 'train/train_class')
+            train_options.validation_folder = os.path.join(args.data_dir, 'val/val_class')
         if args.epochs is not None:
             if train_options.start_epoch < args.epochs:
                 train_options.number_of_epochs = args.epochs
@@ -112,7 +124,10 @@ def main():
             start_epoch=start_epoch,
             experiment_name=args.name,
             device_num = args.device_num,
-            pid = os.getpid())
+            pid = os.getpid(),
+            weight_change_method = args.weight_change_method,
+            upDown = args.upDown,
+            )
 
         noise_config = args.noise if args.noise is not None else []
         hidden_config = HiDDenConfiguration(H=args.size, W=args.size,

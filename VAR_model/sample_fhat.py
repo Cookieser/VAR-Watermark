@@ -18,7 +18,10 @@ parser.add_argument('--total_samples', type=int, default=10,
                     help="Specify the total number of samples to generate.")
 parser.add_argument('--save_path', type=str, required=True,
                     help="Path to save the generated samples. This argument is required.")
+parser.add_argument('--device', type=str, required=True,help="Use the device.")
 args = parser.parse_args()
+
+os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
 
 
@@ -44,7 +47,7 @@ if not osp.exists(var_ckpt): os.system(f'wget {hf_home}/{var_ckpt}')
 # build vae, var
 patch_nums = (1, 2, 3, 4, 5, 6, 8, 10, 13, 16)
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda'
 
 if 'vae' not in globals() or 'var' not in globals():
     vae, var = build_vae_var(

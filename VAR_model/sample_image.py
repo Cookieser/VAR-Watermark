@@ -24,6 +24,8 @@ parser.add_argument('--save_path', type=str, required=True,
 parser.add_argument('--device', type=str, required=True,help="Use the device.")
 args = parser.parse_args()
 
+os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+
 
 
 B = args.batch_size
@@ -48,7 +50,7 @@ if not osp.exists(var_ckpt): os.system(f'wget {hf_home}/{var_ckpt}')
 # build vae, var
 patch_nums = (1, 2, 3, 4, 5, 6, 8, 10, 13, 16)
 
-device = f'cuda:{args.device}' 
+device = 'cuda' 
 
 if 'vae' not in globals() or 'var' not in globals():
     vae, var = build_vae_var(
