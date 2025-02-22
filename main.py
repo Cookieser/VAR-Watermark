@@ -49,6 +49,8 @@ def main():
     new_run_parser.add_argument('--adversarial-weight', default=1e-3, type=float,help='The init weight of the adversarial ')
     new_run_parser.add_argument('--weight-change-method', default="vanilla", type=str,help='The method of changing weight in the training process')
     new_run_parser.add_argument('--upDown', default=True,type= bool,help='The encoder weight up & the decoder weight down when using the changing-weight training')
+    new_run_parser.add_argument('--useVGG', default=False,type= bool,help='The use of VGG')
+
     new_run_parser.set_defaults(tensorboard=False)
     new_run_parser.set_defaults(enable_fp16=False)
 
@@ -68,6 +70,7 @@ def main():
     continue_parser.add_argument('--device-num', '-n', type=str, default='0',help='GPU device number to use (default: 0)')
     continue_parser.add_argument('--weight-change-method', default="vanilla", type=str,help='The method of changing weight in the training process')
     continue_parser.add_argument('--upDown', default=True,type= bool,help='The encoder weight up & the decoder weight down when using the changing-weight training')
+    continue_parser.add_argument('--useVGG', default=False,type= bool,help='The use of VGG')
     new_run_parser.set_defaults(tensorboard=False)
 
     # continue_parser.add_argument('--tensorboard', action='store_true',help='Override the previous setting regarding tensorboard logging.')
@@ -135,7 +138,7 @@ def main():
                                             encoder_blocks=4, encoder_channels=64,
                                             decoder_blocks=7, decoder_channels=64,
                                             use_discriminator=True,
-                                            use_vgg=False,
+                                            use_vgg=args.useVGG,
                                             discriminator_blocks=3, discriminator_channels=64,
                                             decoder_loss=args.decoder_weight,
                                             encoder_loss=args.encoder_weight,

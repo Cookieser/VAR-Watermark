@@ -116,7 +116,7 @@ def train(model: Hidden,
 
 def weight_change(weight1_start,weight2_start,epoch,max_epoch, method,upDown = True):
 
-    alpha = 9
+    alpha = 5
     decay_rate = 0.1
     
     if method == "linear":

@@ -28,6 +28,7 @@ class Encoder(BaseEncoder):
         expanded_message.unsqueeze_(-1)             # (B, L, 1) -> (B, L, 1, 1)
 
         expanded_message = expanded_message.expand(-1,-1, self.H, self.W)  # (B, L, H, W)
+        
         encoded_image = self.conv_layers(image) # (B, conv_channels, H, W)
         # concatenate expanded message and image
         concat = torch.cat([expanded_message, encoded_image, image], dim=1) # (B, L + conv_channels + input_size , H, W)

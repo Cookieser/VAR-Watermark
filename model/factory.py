@@ -10,6 +10,10 @@ def get_encoder(encoder_name, config,input_size):
     elif encoder_name == 'encoder_De_END':
         from model.encoder.encoder_De_END import Encoder
         return Encoder(config,input_size)
+    elif encoder_name == 'encoder_De_END_True':
+        from model.encoder.encoder_De_END_True import Encoder
+        return Encoder(config,input_size)
+
     else:
         raise ValueError(f"Error: {encoder_name}")
 
@@ -64,5 +68,12 @@ def get_encoder_decoder_dis(encoder_decoder_name, config,noiser):
         from model.encoder_decoder.var_d_encoder_decoder_De_END import EncoderDecoder
         return EncoderDecoder(config,noiser),Discriminator(config,32)
 
+    elif encoder_decoder_name == 'var_ed_encoder_decoder_De_END2':
+        from model.encoder_decoder.var_ed_encoder_decoder_De_END2 import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,3)
+
+    elif encoder_decoder_name == 'var_ed_encoder_decoder_De_END_vgg':
+        from model.encoder_decoder.var_ed_encoder_decoder_De_END_vgg import EncoderDecoder
+        return EncoderDecoder(config,noiser),Discriminator(config,3)
     else:
         raise ValueError(f"Error: {encoder_decoder_name}")
